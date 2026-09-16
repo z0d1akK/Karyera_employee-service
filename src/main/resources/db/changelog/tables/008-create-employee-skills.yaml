@@ -1,0 +1,74 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 008-create-employee-skills
+      author: zodiakk
+
+      changes:
+        - createTable:
+            tableName: employee_skills
+            columns:
+
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employee_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: skill_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: level
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: years_of_experience
+                  type: DECIMAL(4,2)
+
+              - column:
+                  name: last_assessed_at
+                  type: DATE
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: employee_skills
+            baseColumnNames: employee_id
+            referencedTableName: employees
+            referencedColumnNames: id
+            constraintName: fk_employee_skill_employee
+
+        - addForeignKeyConstraint:
+            baseTableName: employee_skills
+            baseColumnNames: skill_id
+            referencedTableName: skills
+            referencedColumnNames: id
+            constraintName: fk_employee_skill_skill
+
+        - addUniqueConstraint:
+            tableName: employee_skills
+            columnNames: employee_id, skill_id
+            constraintName: uk_employee_skill

@@ -1,0 +1,90 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 012-create-employee-responsibilities
+      author: zodiakk
+
+      changes:
+        - createTable:
+            tableName: employee_responsibilities
+            columns:
+
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employee_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: responsible_employee_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: responsibility_type_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: start_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: end_date
+                  type: DATE
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: employee_responsibilities
+            baseColumnNames: employee_id
+            referencedTableName: employees
+            referencedColumnNames: id
+            constraintName: fk_responsibility_employee
+
+        - addForeignKeyConstraint:
+            baseTableName: employee_responsibilities
+            baseColumnNames: responsible_employee_id
+            referencedTableName: employees
+            referencedColumnNames: id
+            constraintName: fk_responsibility_responsible_employee
+
+        - addForeignKeyConstraint:
+            baseTableName: employee_responsibilities
+            baseColumnNames: responsibility_type_id
+            referencedTableName: responsibility_types
+            referencedColumnNames: id
+            constraintName: fk_responsibility_type
+
+        - sql:
+            sql: >
+              ALTER TABLE employee_responsibilities
+              ADD CONSTRAINT chk_responsibility_dates
+              CHECK (end_date IS NULL OR end_date >= start_date);
+
+        - sql:
+            sql: >
+              ALTER TABLE employee_responsibilities
+              ADD CONSTRAINT chk_employee_not_responsible_for_self
+              CHECK (employee_id <> responsible_employee_id);

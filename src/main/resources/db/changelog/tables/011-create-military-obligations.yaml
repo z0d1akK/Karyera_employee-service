@@ -1,0 +1,61 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 011-create-military-obligations
+      author: zodiakk
+
+      changes:
+        - createTable:
+            tableName: military_obligations
+            columns:
+
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employee_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+
+              - column:
+                  name: status
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: military_rank
+                  type: VARCHAR(100)
+
+              - column:
+                  name: category
+                  type: VARCHAR(100)
+
+              - column:
+                  name: document_number
+                  type: VARCHAR(100)
+
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - addForeignKeyConstraint:
+            baseTableName: military_obligations
+            baseColumnNames: employee_id
+            referencedTableName: employees
+            referencedColumnNames: id
+            constraintName: fk_military_obligation_employee

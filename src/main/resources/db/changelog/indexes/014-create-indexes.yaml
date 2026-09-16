@@ -1,0 +1,161 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 014-create-employee-indexes
+      author: zodiakk
+
+      changes:
+
+        # employees
+
+        - createIndex:
+            indexName: idx_employees_last_name
+            tableName: employees
+            columns:
+              - column:
+                  name: last_name
+
+        - createIndex:
+            indexName: idx_employees_first_name
+            tableName: employees
+            columns:
+              - column:
+                  name: first_name
+
+        - createIndex:
+            indexName: idx_employees_hire_date
+            tableName: employees
+            columns:
+              - column:
+                  name: hire_date
+
+        - createIndex:
+            indexName: idx_employees_position_id
+            tableName: employees
+            columns:
+              - column:
+                  name: position_id
+
+        - createIndex:
+            indexName: idx_employees_specialization_id
+            tableName: employees
+            columns:
+              - column:
+                  name: specialization_id
+
+        - createIndex:
+            indexName: idx_employees_grade_id
+            tableName: employees
+            columns:
+              - column:
+                  name: grade_id
+
+        - createIndex:
+            indexName: idx_employees_department_id
+            tableName: employees
+            columns:
+              - column:
+                  name: department_id
+
+        # employee_skills
+
+        - createIndex:
+            indexName: idx_employee_skills_employee_id
+            tableName: employee_skills
+            columns:
+              - column:
+                  name: employee_id
+
+        - createIndex:
+            indexName: idx_employee_skills_skill_id
+            tableName: employee_skills
+            columns:
+              - column:
+                  name: skill_id
+
+        - createIndex:
+            indexName: idx_employee_skills_level
+            tableName: employee_skills
+            columns:
+              - column:
+                  name: level
+
+        # experiences
+
+        - createIndex:
+            indexName: idx_experiences_employee_id
+            tableName: experiences
+            columns:
+              - column:
+                  name: employee_id
+
+        - createIndex:
+            indexName: idx_experiences_start_date
+            tableName: experiences
+            columns:
+              - column:
+                  name: start_date
+
+        - createIndex:
+            indexName: idx_experiences_end_date
+            tableName: experiences
+            columns:
+              - column:
+                  name: end_date
+
+        # educations
+
+        - createIndex:
+            indexName: idx_educations_employee_id
+            tableName: educations
+            columns:
+              - column:
+                  name: employee_id
+
+        - createIndex:
+            indexName: idx_educations_education_level
+            tableName: educations
+            columns:
+              - column:
+                  name: education_level
+
+        # responsibility
+
+        - createIndex:
+            indexName: idx_employee_responsibilities_employee_id
+            tableName: employee_responsibilities
+            columns:
+              - column:
+                  name: employee_id
+
+        - createIndex:
+            indexName: idx_employee_responsibilities_responsible_employee_id
+            tableName: employee_responsibilities
+            columns:
+              - column:
+                  name: responsible_employee_id
+
+        - createIndex:
+            indexName: idx_employee_responsibilities_type_id
+            tableName: employee_responsibilities
+            columns:
+              - column:
+                  name: responsibility_type_id
+
+        - createIndex:
+            indexName: idx_employee_responsibilities_employee_type
+            tableName: employee_responsibilities
+            columns:
+              - column:
+                  name: employee_id
+              - column:
+                  name: responsibility_type_id
+
+        - createIndex:
+            indexName: idx_employee_responsibilities_responsible_type
+            tableName: employee_responsibilities
+            columns:
+              - column:
+                  name: responsible_employee_id
+              - column:
+                  name: responsibility_type_id

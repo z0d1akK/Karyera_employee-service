@@ -1,0 +1,43 @@
+databaseChangeLog:
+
+  - include:
+      file: db/changelog/tables/001-create-departments.yaml
+
+  - include:
+      file: db/changelog/tables/002-create-positions.yaml
+
+  - include:
+      file: db/changelog/tables/003-create-specializations.yaml
+
+  - include:
+      file: db/changelog/tables/004-create-grades.yaml
+
+  - include:
+      file: db/changelog/tables/005-create-skills.yaml
+
+  - include:
+      file: db/changelog/tables/006-create-responsibility-types.yaml
+
+  - include:
+      file: db/changelog/tables/007-create-employees.yaml
+
+  - include:
+      file: db/changelog/tables/008-create-employee-skills.yaml
+
+  - include:
+      file: db/changelog/tables/009-create-experiences.yaml
+
+  - include:
+      file: db/changelog/tables/010-create-educations.yaml
+
+  - include:
+      file: db/changelog/tables/011-create-military-obligations.yaml
+
+  - include:
+      file: db/changelog/tables/012-create-employee-responsibilities.yaml
+
+  - include:
+      file: db/changelog/tables/013-create-employee-profile-photos.yaml
+
+  - include:
+      file: db/changelog/indexes/014-create-indexes.yaml
