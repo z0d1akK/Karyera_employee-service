@@ -32,7 +32,6 @@
         <lombok.version>1.18.30</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <springdoc.version>3.1.0</springdoc.version>
-        <jjwt.version>0.12.7</jjwt.version>
     </properties>
     <dependencies>
         <dependency>
