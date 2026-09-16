@@ -17,8 +17,8 @@ public class GradeUpdateRequestDto {
     @Size(min = 2, max = 100, message = ValidationMessages.NAME_SIZE)
     private String name;
 
-    @Min(value = 1, message = "Grade level must be greater than zero")
-    @Max(value = 100, message = "Grade level cannot exceed {value}")
+    @Min(value = 1, message = ValidationMessages.GRADE_LEVEL_MIN)
+    @Max(value = 100, message = ValidationMessages.GRADE_LEVEL_MAX)
     private Integer level;
 
     @Size(max = 500, message = ValidationMessages.DESCRIPTION_SIZE)

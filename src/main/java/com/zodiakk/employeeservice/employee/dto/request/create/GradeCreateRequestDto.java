@@ -20,8 +20,8 @@ public class GradeCreateRequestDto {
     private String name;
 
     @NotNull(message = ValidationMessages.FIELD_REQUIRED)
-    @Min(value = 1, message = "Grade level must be greater than zero")
-    @Max(value = 100, message = "Grade level cannot exceed {value}")
+    @Min(value = 1, message = ValidationMessages.GRADE_LEVEL_MIN)
+    @Max(value = 100, message = ValidationMessages.GRADE_LEVEL_MAX)
     private Integer level;
 
     @Size(max = 500, message = ValidationMessages.DESCRIPTION_SIZE)

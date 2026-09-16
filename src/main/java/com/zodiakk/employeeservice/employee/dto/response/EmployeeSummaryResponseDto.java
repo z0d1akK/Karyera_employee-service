@@ -25,7 +25,7 @@ public class EmployeeSummaryResponseDto {
     @Schema(description = "Employee lastname")
     private String lastName;
 
-    @Schema(description = "Employee middlename")
+    @Schema(description = "Employee middle name")
     private String middleName;
 
     @Schema(description = "Employee position")

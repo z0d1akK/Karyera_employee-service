@@ -16,25 +16,14 @@ import java.time.LocalDate;
 public class ExperienceCreateRequestDto {
 
     @NotBlank(message = ValidationMessages.COMPANY_REQUIRED)
-    @Size(
-            min = 2,
-            max = 200,
-            message = ValidationMessages.COMPANY_SIZE
-    )
+    @Size(min = 2, max = 200, message = ValidationMessages.COMPANY_SIZE)
     private String company;
 
     @NotBlank(message = ValidationMessages.EXPERIENCE_POSITION_REQUIRED)
-    @Size(
-            min = 2,
-            max = 150,
-            message = ValidationMessages.EXPERIENCE_POSITION_SIZE
-    )
+    @Size(min = 2, max = 150, message = ValidationMessages.EXPERIENCE_POSITION_SIZE)
     private String position;
 
-    @Size(
-            max = 1000,
-            message = ValidationMessages.EXPERIENCE_DESCRIPTION_SIZE
-    )
+    @Size(max = 1000, message = ValidationMessages.EXPERIENCE_DESCRIPTION_SIZE)
     private String description;
 
     @NotNull(message = ValidationMessages.START_DATE_REQUIRED)

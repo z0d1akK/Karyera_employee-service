@@ -16,7 +16,7 @@ public class SkillCreateRequestDto {
     @Size(min = 2, max = 150, message = ValidationMessages.NAME_SIZE)
     private String name;
 
-    @Size(max = 100, message = "Category must be less than {max} characters")
+    @Size(max = 100, message = ValidationMessages.CATEGORY_SIZE)
     private String category;
 
     @Size(max = 500, message = ValidationMessages.DESCRIPTION_SIZE)

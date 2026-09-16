@@ -23,25 +23,15 @@ public class EducationUpdateRequestDto {
 
     @Schema(description = "Institution name", example = "BSUIR")
     @NotBlank(message = ValidationMessages.INSTITUTION_REQUIRED)
-    @Size(
-            min = 2,
-            max = 250,
-            message = ValidationMessages.INSTITUTION_SIZE
-    )
+    @Size(min = 2, max = 250, message = ValidationMessages.INSTITUTION_SIZE)
     private String institutionName;
 
     @Schema(description = "Field of study", example = "CS")
-    @Size(
-            max = 200,
-            message = ValidationMessages.FIELD_OF_STUDY_SIZE
-    )
+    @Size(max = 200, message = ValidationMessages.FIELD_OF_STUDY_SIZE)
     private String fieldOfStudy;
 
     @Schema(description = "Degree name", example = "Software engineer")
-    @Size(
-            max = 200,
-            message = ValidationMessages.DEGREE_NAME_SIZE
-    )
+    @Size(max = 200, message = ValidationMessages.DEGREE_NAME_SIZE)
     private String degreeName;
 
     @Schema(description = "Education start date", example = "2013-08-01")

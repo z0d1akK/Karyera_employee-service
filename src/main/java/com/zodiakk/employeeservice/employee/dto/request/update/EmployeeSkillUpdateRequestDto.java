@@ -26,13 +26,7 @@ public class EmployeeSkillUpdateRequestDto {
     @Max(value = 5, message = ValidationMessages.SKILL_LEVEL_RANGE)
     private Integer level;
 
-    @DecimalMin(
-            value = "0.0",
-            message = ValidationMessages.YEARS_OF_EXPERIENCE_MIN
-    )
-    @DecimalMax(
-            value = "100.0",
-            message = "Years of experience cannot exceed {value}"
-    )
+    @DecimalMin(value = "0.0", message = ValidationMessages.YEARS_OF_EXPERIENCE_MIN)
+    @DecimalMax(value = "100.0", message = ValidationMessages.YEARS_OF_EXPERIENCE_MAX)
     private BigDecimal yearsOfExperience;
 }
