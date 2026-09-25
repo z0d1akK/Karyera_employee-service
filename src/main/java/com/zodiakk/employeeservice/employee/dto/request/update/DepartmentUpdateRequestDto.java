@@ -19,7 +19,4 @@ public class DepartmentUpdateRequestDto {
     @Schema(description = "Department description")
     @Size(max = 500, message = ValidationMessages.DESCRIPTION_SIZE)
     private String description;
-
-    @Schema(description = "Whether the department is active")
-    private Boolean active;
 }

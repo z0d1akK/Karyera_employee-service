@@ -35,6 +35,7 @@ public class EducationCreateRequestDto {
     private String degreeName;
 
     @Schema(description = "Education start date", example = "2013-08-01")
+
     private LocalDate startDate;
 
     @Schema(description = "Education end date", example = "2024-08-01")

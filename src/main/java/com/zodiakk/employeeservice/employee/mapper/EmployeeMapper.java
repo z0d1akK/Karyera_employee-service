@@ -36,6 +36,7 @@ public interface EmployeeMapper {
     @Mapping(target = "version", ignore = true)
     Employee toEntity(EmployeeCreateRequestDto dto);
 
+    @Mapping(target = "responsibilities", ignore = true)
     EmployeeResponseDto toResponseDto(Employee employee);
 
     @Mapping(target = "position", ignore = true)

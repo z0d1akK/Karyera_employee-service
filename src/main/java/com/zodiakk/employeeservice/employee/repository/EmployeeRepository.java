@@ -18,4 +18,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, UUID>, JpaSp
     long countByPositionId(UUID positionId);
 
     long countByDepartmentId(UUID departmentId);
+
+    long countByGradeId(UUID gradeId);
+
+    long countBySpecializationId(UUID specializationId);
 }

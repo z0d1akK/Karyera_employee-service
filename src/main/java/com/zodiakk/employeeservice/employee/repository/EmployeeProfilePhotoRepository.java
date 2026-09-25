@@ -11,8 +11,4 @@ import java.util.UUID;
 public interface EmployeeProfilePhotoRepository extends JpaRepository<EmployeeProfilePhoto, UUID> {
 
     Optional<EmployeeProfilePhoto> findByEmployeeId(UUID employeeId);
-
-    boolean existsByEmployeeId(UUID employeeId);
-
-    Optional<EmployeeProfilePhoto> findByObjectKey(String objectKey);
 }

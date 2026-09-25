@@ -1,9 +1,7 @@
 package com.zodiakk.employeeservice.employee.dto.request.create;
 
 import com.zodiakk.employeeservice.common.validation.ValidationMessages;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -27,6 +25,7 @@ public class ExperienceCreateRequestDto {
     private String description;
 
     @NotNull(message = ValidationMessages.START_DATE_REQUIRED)
+    @PastOrPresent(message = ValidationMessages.START_DATE_VALID)
     private LocalDate startDate;
 
     private LocalDate endDate;

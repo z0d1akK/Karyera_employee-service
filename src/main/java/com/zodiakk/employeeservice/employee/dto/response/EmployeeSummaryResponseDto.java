@@ -39,4 +39,7 @@ public class EmployeeSummaryResponseDto {
 
     @Schema(description = "Employee employment status")
     private EmploymentStatus employmentStatus;
+
+    @Schema(description = "Optimistic lock version")
+    private Long version;
 }

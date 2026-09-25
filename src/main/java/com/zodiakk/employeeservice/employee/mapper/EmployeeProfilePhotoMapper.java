@@ -16,6 +16,7 @@ public interface EmployeeProfilePhotoMapper {
     EmployeeProfilePhoto toEntity(EmployeeProfilePhotoCreateRequestDto dto);
 
     @Mapping(target = "employeeId", source = "employee.id")
+    @Mapping(target = "url", ignore = true)
     EmployeeProfilePhotoResponseDto toResponseDto(EmployeeProfilePhoto profilePhoto);
 
     @Mapping(target = "employee", ignore = true)

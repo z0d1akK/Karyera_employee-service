@@ -3,8 +3,6 @@ package com.zodiakk.employeeservice.employee.dto.request.update;
 import com.zodiakk.employeeservice.common.validation.ValidationMessages;
 import com.zodiakk.employeeservice.employee.entity.enums.EducationLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
@@ -18,11 +16,9 @@ import java.time.LocalDate;
 public class EducationUpdateRequestDto {
 
     @Schema(description = "Education level", example = "SECONDARY")
-    @NotNull(message = ValidationMessages.EDUCATION_LEVEL_REQUIRED)
     private EducationLevel educationLevel;
 
     @Schema(description = "Institution name", example = "BSUIR")
-    @NotBlank(message = ValidationMessages.INSTITUTION_REQUIRED)
     @Size(min = 2, max = 250, message = ValidationMessages.INSTITUTION_SIZE)
     private String institutionName;
 

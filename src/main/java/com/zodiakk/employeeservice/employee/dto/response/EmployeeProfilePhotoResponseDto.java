@@ -31,6 +31,9 @@ public class EmployeeProfilePhotoResponseDto {
     @Schema(description = "Employee profile photo file size")
     private Long fileSize;
 
+    @Schema(description = "Presigned URL for downloading the photo")
+    private String url;
+
     private OffsetDateTime createdAt;
 
     private OffsetDateTime updatedAt;

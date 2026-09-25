@@ -32,6 +32,7 @@
         <lombok.version>1.18.30</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <springdoc.version>3.1.0</springdoc.version>
+        <s3.version>2.29.45</s3.version>
     </properties>
     <dependencies>
         <dependency>
@@ -78,6 +79,11 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${s3.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

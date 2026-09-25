@@ -10,6 +10,10 @@ public final class ValidationMessages {
     public static final String ID_REQUIRED = "Идентификатор обязателен для заполнения";
     public static final String UUID_VALID = "Идентификатор должен быть корректным UUID";
 
+    public static final String PAGE_MIN_SIZE = "Размер страницы должен быть больше нуля";
+    public static final String PAGE_MAX_SIZE = "Размер страницы не может превышать {value}";
+    public static final String PAGE_NUMBER_MIN = "Номер страницы не может быть отрицательным";
+
     public static final String NAME_REQUIRED = "Имя обязательно для заполнения";
     public static final String NAME_SIZE = "Имя должно содержать от {min} до {max} символов";
 
@@ -38,16 +42,12 @@ public final class ValidationMessages {
     public static final String MAX_SUBORDINATES_MIN = "Максимальное количество подчинённых не может быть отрицательным";
     public static final String MAX_SUBORDINATES_MAX = "Максимальное количество подчинённых не может превышать {value}";
 
-    public static final String EMPLOYEE_REQUIRED = "Сотрудник обязателен для заполнения";
-
     public static final String SKILL_REQUIRED = "Навык обязателен для заполнения";
     public static final String SKILL_LEVEL_REQUIRED = "Уровень навыка обязателен для заполнения";
     public static final String SKILL_LEVEL_RANGE = "Уровень навыка должен быть от {min} до {max}";
 
     public static final String YEARS_OF_EXPERIENCE_MIN = "Опыт работы не может быть отрицательным";
     public static final String YEARS_OF_EXPERIENCE_MAX = "Опыт работы не может превышать {value}";
-
-    public static final String ASSESSMENT_DATE_PAST = "Дата оценки не может быть в будущем";
 
     public static final String COMPANY_REQUIRED = "Компания обязательна для заполнения";
     public static final String COMPANY_SIZE = "Название компании должно содержать от {min} до {max} символов";
@@ -57,6 +57,7 @@ public final class ValidationMessages {
     public static final String EXPERIENCE_DESCRIPTION_SIZE = "Описание должно содержать не более {max} символов";
 
     public static final String START_DATE_REQUIRED = "Дата начала обязательна для заполнения";
+    public static final String START_DATE_VALID = "Дата начала должна быть не раньше сегодняшнего дня";
 
     public static final String EDUCATION_LEVEL_REQUIRED = "Уровень образования обязателен для заполнения";
 

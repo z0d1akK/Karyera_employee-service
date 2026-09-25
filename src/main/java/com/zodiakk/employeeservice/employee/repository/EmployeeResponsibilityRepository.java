@@ -2,6 +2,8 @@ package com.zodiakk.employeeservice.employee.repository;
 
 import com.zodiakk.employeeservice.employee.entity.EmployeeResponsibility;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,9 +17,6 @@ public interface EmployeeResponsibilityRepository extends JpaRepository<Employee
 
     List<EmployeeResponsibility> findAllByResponsibleEmployeeId(UUID responsibleEmployeeId);
 
-    List<EmployeeResponsibility> findAllByResponsibleEmployeeIdAndResponsibilityTypeCode
-            (UUID responsibleEmployeeId, String responsibilityTypeCode);
-
     Optional<EmployeeResponsibility>
     findByEmployeeIdAndResponsibleEmployeeIdAndResponsibilityTypeIdAndEndDateIsNull
             (UUID employeeId, UUID responsibleEmployeeId, UUID responsibilityTypeId);
@@ -25,6 +24,16 @@ public interface EmployeeResponsibilityRepository extends JpaRepository<Employee
     long countByResponsibleEmployeeIdAndResponsibilityTypeCodeAndEndDateIsNull
             (UUID responsibleEmployeeId, String responsibilityTypeCode);
 
-    boolean existsByEmployeeIdAndResponsibleEmployeeIdAndResponsibilityTypeIdAndEndDateIsNull
-            (UUID employeeId, UUID responsibleEmployeeId, UUID responsibilityTypeId);
+    long countByResponsibleEmployeeIdAndEndDateIsNull(UUID responsibleEmployeeId);
+
+    boolean existsByResponsibilityTypeId(UUID responsibilityTypeId);
+
+    @Query("""
+            SELECT r FROM EmployeeResponsibility r
+            WHERE r.endDate IS NULL
+              AND (r.employee.id = :employeeId OR r.responsibleEmployee.id = :employeeId)
+            """)
+    List<EmployeeResponsibility> findActiveInvolvingEmployee(@Param("employeeId") UUID employeeId);
+
+    void deleteByEmployeeIdOrResponsibleEmployeeId(UUID employeeId, UUID responsibleEmployeeId);
 }

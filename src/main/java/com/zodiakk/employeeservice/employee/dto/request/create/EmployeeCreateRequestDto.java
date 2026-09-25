@@ -77,9 +77,7 @@ public class EmployeeCreateRequestDto {
     @Max(value = 1000, message = ValidationMessages.MAX_SUBORDINATES_MAX)
     private Integer maxSubordinates;
 
-    @Schema(description = "Employment status",
-            example = "ACTIVE"
-    )
+    @Schema(description = "Employment status", example = "ACTIVE")
     @NotNull(message = ValidationMessages.EMPLOYMENT_STATUS_REQUIRED)
     private EmploymentStatus employmentStatus;
 }
