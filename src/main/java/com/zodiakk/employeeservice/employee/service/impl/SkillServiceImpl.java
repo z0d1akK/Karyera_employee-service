@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.repository.specification.skill.Skill
 import com.zodiakk.employeeservice.employee.repository.specification.skill.SkillSpecification;
 import com.zodiakk.employeeservice.employee.service.SkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.SKILLS;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public SkillResponseDto create(SkillCreateRequestDto request) {
         validateNameUniqueness(request.getName());
 
@@ -48,6 +53,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @Cacheable(cacheNames = SKILLS, key = "#id")
     public SkillResponseDto getById(UUID id) {
         return skillMapper.toResponseDto(findById(id));
     }
@@ -63,6 +69,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public SkillResponseDto update(UUID id, SkillUpdateRequestDto request) {
         Skill skill = findById(id);
 
@@ -80,6 +87,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void deactivate(UUID id) {
         Skill skill = findById(id);
 
@@ -91,6 +99,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void activate(UUID id) {
         Skill skill = findById(id);
 
@@ -102,6 +111,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void delete(UUID id) {
         Skill skill = findById(id);
 

@@ -37,6 +37,8 @@ import com.zodiakk.employeeservice.employee.repository.specification.employee.Em
 import com.zodiakk.employeeservice.employee.repository.specification.employee.EmployeeSpecification;
 import com.zodiakk.employeeservice.employee.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -71,6 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto create(EmployeeCreateRequestDto request) {
         if (employeeRepository.existsByUserId(request.getUserId())) {
             throw new EmployeeAlreadyExistsException(request.getUserId());
@@ -98,11 +103,13 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Cacheable(cacheNames = EMPLOYEES, key = "'id:' + #id")
     public EmployeeResponseDto getById(UUID id) {
         return toFullResponse(findById(id));
     }
 
     @Override
+    @Cacheable(cacheNames = EMPLOYEES, key = "'user:' + #userId")
     public EmployeeResponseDto getByUserId(UUID userId) {
         Employee employee = employeeRepository.findByUserId(userId)
                 .orElseThrow(() -> EmployeeNotFoundException.byUserId(userId));
@@ -119,6 +126,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto update(UUID id, EmployeeUpdateRequestDto request) {
         Employee employee = findById(id);
 
@@ -153,6 +161,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto changeStatus(UUID id, EmploymentStatus status) {
         Employee employee = findById(id);
         EmploymentStatus previousStatus = employee.getEmploymentStatus();
@@ -168,6 +177,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID id) {
         Employee employee = findById(id);
 

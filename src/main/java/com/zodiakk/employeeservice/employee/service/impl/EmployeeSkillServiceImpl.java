@@ -18,12 +18,15 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeSkillRepository;
 import com.zodiakk.employeeservice.employee.repository.SkillRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeSkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeSkillResponseDto add(UUID employeeId, EmployeeSkillCreateRequestDto request) {
         Employee employee = findEmployee(employeeId);
         Skill skill = resolveActiveSkill(request.getSkillId());
@@ -75,6 +79,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeSkillResponseDto update(UUID employeeId, UUID employeeSkillId, EmployeeSkillUpdateRequestDto request) {
         EmployeeSkill employeeSkill = findOwnedEmployeeSkill(employeeId, employeeSkillId);
 
@@ -96,6 +101,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void remove(UUID employeeId, UUID employeeSkillId) {
         EmployeeSkill employeeSkill = findOwnedEmployeeSkill(employeeId, employeeSkillId);
 

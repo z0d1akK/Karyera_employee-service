@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.repository.specification.responsibil
 import com.zodiakk.employeeservice.employee.repository.specification.responsibilitytype.ResponsibilityTypeSpecification;
 import com.zodiakk.employeeservice.employee.service.ResponsibilityTypeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.RESPONSIBILITY_TYPES;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public ResponsibilityTypeResponseDto create(ResponsibilityTypeCreateRequestDto request) {
         validateCodeUniqueness(request.getCode());
 
@@ -48,6 +53,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @Cacheable(cacheNames = RESPONSIBILITY_TYPES, key = "#id")
     public ResponsibilityTypeResponseDto getById(UUID id) {
         return responsibilityTypeMapper.toResponseDto(findById(id));
     }
@@ -66,6 +72,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public ResponsibilityTypeResponseDto update(UUID id, ResponsibilityTypeUpdateRequestDto request) {
         ResponsibilityType responsibilityType = findById(id);
 
@@ -83,6 +90,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void deactivate(UUID id) {
         ResponsibilityType responsibilityType = findById(id);
 
@@ -94,6 +102,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void activate(UUID id) {
         ResponsibilityType responsibilityType = findById(id);
 
@@ -105,6 +114,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void delete(UUID id) {
         ResponsibilityType responsibilityType = findById(id);
 

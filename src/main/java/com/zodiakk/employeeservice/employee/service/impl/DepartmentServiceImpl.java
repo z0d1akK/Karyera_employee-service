@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.service.DepartmentService;
 import com.zodiakk.employeeservice.employee.repository.specification.department.DepartmentPageableFactory;
 import com.zodiakk.employeeservice.employee.repository.specification.department.DepartmentSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.DEPARTMENTS;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public DepartmentResponseDto create(DepartmentCreateRequestDto request) {
         validateNameUniqueness(request.getName());
 
@@ -48,6 +53,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @Cacheable(cacheNames = DEPARTMENTS, key = "#id")
     public DepartmentResponseDto getById(UUID id) {
         return departmentMapper.toResponseDto(findById(id));
     }
@@ -63,6 +69,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public DepartmentResponseDto update(UUID id, DepartmentUpdateRequestDto request) {
         Department department = findById(id);
 
@@ -80,6 +87,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void deactivate(UUID id) {
         Department department = findById(id);
 
@@ -91,6 +99,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void activate(UUID id) {
         Department department = findById(id);
 
@@ -102,6 +111,7 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void delete(UUID id) {
         Department department = findById(id);
 

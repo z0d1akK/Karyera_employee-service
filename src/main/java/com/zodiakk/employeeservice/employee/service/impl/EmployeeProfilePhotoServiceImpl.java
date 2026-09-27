@@ -15,6 +15,7 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeProfilePhotoRepos
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeProfilePhotoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,8 @@ import java.io.IOException;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -47,6 +50,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeProfilePhotoResponseDto upload(UUID employeeId, MultipartFile file) {
         Employee employee = findEmployee(employeeId);
         validateFile(file);
@@ -99,6 +103,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId) {
         Employee employee = findEmployee(employeeId);
         EmployeeProfilePhoto photo = employeeProfilePhotoRepository.findByEmployeeId(employeeId)

@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.repository.specification.position.Po
 import com.zodiakk.employeeservice.employee.repository.specification.position.PositionSpecification;
 import com.zodiakk.employeeservice.employee.service.PositionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.POSITIONS;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public PositionResponseDto create(PositionCreateRequestDto request) {
         validateNameUniqueness(request.getName());
 
@@ -48,6 +53,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @Cacheable(cacheNames = POSITIONS, key = "#id")
     public PositionResponseDto getById(UUID id) {
         return positionMapper.toResponseDto(findById(id));
     }
@@ -63,6 +69,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public PositionResponseDto update(UUID id, PositionUpdateRequestDto request) {
         Position position = findById(id);
 
@@ -80,6 +87,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void deactivate(UUID id) {
         Position position = findById(id);
 
@@ -91,6 +99,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void activate(UUID id) {
         Position position = findById(id);
 
@@ -102,6 +111,7 @@ public class PositionServiceImpl implements PositionService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void delete(UUID id) {
         Position position = findById(id);
 

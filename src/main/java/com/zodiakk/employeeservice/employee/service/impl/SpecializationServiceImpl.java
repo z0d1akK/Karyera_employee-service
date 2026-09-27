@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.repository.specification.specializat
 import com.zodiakk.employeeservice.employee.repository.specification.specialization.SpecializationSpecification;
 import com.zodiakk.employeeservice.employee.service.SpecializationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.SPECIALIZATIONS;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public SpecializationResponseDto create(SpecializationCreateRequestDto request) {
         validateNameUniqueness(request.getName());
 
@@ -48,6 +53,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @Cacheable(cacheNames = SPECIALIZATIONS, key = "#id")
     public SpecializationResponseDto getById(UUID id) {
         return specializationMapper.toResponseDto(findById(id));
     }
@@ -63,6 +69,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public SpecializationResponseDto update(UUID id, SpecializationUpdateRequestDto request) {
         Specialization specialization = findById(id);
 
@@ -80,6 +87,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void deactivate(UUID id) {
         Specialization specialization = findById(id);
 
@@ -91,6 +99,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void activate(UUID id) {
         Specialization specialization = findById(id);
 
@@ -102,6 +111,7 @@ public class SpecializationServiceImpl implements SpecializationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void delete(UUID id) {
         Specialization specialization = findById(id);
 

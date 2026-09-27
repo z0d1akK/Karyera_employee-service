@@ -14,12 +14,15 @@ import com.zodiakk.employeeservice.employee.repository.EducationRepository;
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.service.EducationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EducationResponseDto add(UUID employeeId, EducationCreateRequestDto request) {
         Employee employee = findEmployee(employeeId);
         validateDateRange(request.getStartDate(), request.getEndDate());
@@ -59,6 +63,7 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EducationResponseDto update(UUID employeeId, UUID educationId, EducationUpdateRequestDto request) {
         Education education = findOwnedEducation(employeeId, educationId);
 
@@ -73,6 +78,7 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId, UUID educationId) {
         Education education = findOwnedEducation(employeeId, educationId);
         educationRepository.delete(education);

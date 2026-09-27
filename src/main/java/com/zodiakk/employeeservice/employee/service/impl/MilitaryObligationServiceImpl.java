@@ -13,10 +13,13 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.repository.MilitaryObligationRepository;
 import com.zodiakk.employeeservice.employee.service.MilitaryObligationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +34,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto create(UUID employeeId, MilitaryObligationCreateRequestDto request) {
         Employee employee = findEmployee(employeeId);
 
@@ -59,6 +63,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto update(UUID employeeId, MilitaryObligationUpdateRequestDto request) {
         MilitaryObligation obligation = findByEmployeeId(employeeId);
 
@@ -71,6 +76,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto upsert(UUID employeeId, MilitaryObligationCreateRequestDto request) {
         findEmployee(employeeId);
 
@@ -96,6 +102,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId) {
         Employee employee = findEmployee(employeeId);
 

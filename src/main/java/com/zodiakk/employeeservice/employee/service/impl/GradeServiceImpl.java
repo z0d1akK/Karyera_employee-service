@@ -16,12 +16,16 @@ import com.zodiakk.employeeservice.employee.repository.specification.grade.Grade
 import com.zodiakk.employeeservice.employee.repository.specification.grade.GradeSpecification;
 import com.zodiakk.employeeservice.employee.service.GradeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.GRADES;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +40,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = GRADES, allEntries = true)
     public GradeResponseDto create(GradeCreateRequestDto request) {
         validateUniqueness(request.getName(), request.getLevel());
 
@@ -48,6 +53,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @Cacheable(value = GRADES, key = "#id")
     public GradeResponseDto getById(UUID id) {
         return gradeMapper.toResponseDto(findById(id));
     }
@@ -63,6 +69,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = GRADES, allEntries = true)
     public GradeResponseDto update(UUID id, GradeUpdateRequestDto request) {
         Grade grade = findById(id);
 
@@ -86,6 +93,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void deactivate(UUID id) {
         Grade grade = findById(id);
 
@@ -97,6 +105,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void activate(UUID id) {
         Grade grade = findById(id);
 
@@ -108,6 +117,7 @@ public class GradeServiceImpl implements GradeService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void delete(UUID id) {
         Grade grade = findById(id);
 

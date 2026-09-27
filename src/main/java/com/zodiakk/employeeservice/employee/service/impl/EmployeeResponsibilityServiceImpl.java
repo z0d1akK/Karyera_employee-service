@@ -23,12 +23,15 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeResponsibilityRep
 import com.zodiakk.employeeservice.employee.repository.ResponsibilityTypeRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeResponsibilityService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +48,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto assign(
             UUID employeeId,
             EmployeeResponsibilityCreateRequestDto request) {
@@ -101,6 +105,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto close(UUID responsibilityId, LocalDate endDate) {
         EmployeeResponsibility responsibility =
                 findResponsibility(responsibilityId);
@@ -119,6 +124,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto update(UUID responsibilityId,
             EmployeeResponsibilityUpdateRequestDto request
     ) {
@@ -182,6 +188,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID responsibilityId) {
         EmployeeResponsibility responsibility = findResponsibility(responsibilityId);
 

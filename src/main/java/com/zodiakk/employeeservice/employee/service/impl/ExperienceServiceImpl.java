@@ -14,12 +14,15 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.repository.ExperienceRepository;
 import com.zodiakk.employeeservice.employee.service.ExperienceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
+
+import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public ExperienceResponseDto add(UUID employeeId, ExperienceCreateRequestDto request) {
         Employee employee = findEmployee(employeeId);
         validateDateRange(request.getStartDate(), request.getEndDate());
@@ -59,6 +63,7 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public ExperienceResponseDto update(UUID employeeId, UUID experienceId, ExperienceUpdateRequestDto request) {
         Experience experience = findOwnedExperience(employeeId, experienceId);
 
@@ -73,6 +78,7 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     @Transactional
+    @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId, UUID experienceId) {
         Experience experience = findOwnedExperience(employeeId, experienceId);
         experienceRepository.delete(experience);
