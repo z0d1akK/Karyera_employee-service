@@ -1,4 +1,4 @@
-package com.zodiakk.employeeservice.config.s3;
+package com.zodiakk.employeeservice.config.minio;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,18 +6,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "app.s3")
-public class S3Properties {
-
-    private String bucket;
-
-    private String region = "us-east-1";
+@ConfigurationProperties(prefix = "app.minio")
+public class MinioProperties {
 
     private String endpoint;
 
     private String accessKey;
 
     private String secretKey;
+
+    private String bucket;
 
     private long maxFileSize = 5_242_880L;
 

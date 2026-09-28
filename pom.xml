@@ -32,7 +32,7 @@
         <lombok.version>1.18.30</lombok.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <springdoc.version>3.1.0</springdoc.version>
-        <s3.version>2.29.45</s3.version>
+        <minio.version>8.5.17</minio.version>
     </properties>
     <dependencies>
         <dependency>
@@ -85,9 +85,9 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-            <version>${s3.version}</version>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -35,15 +35,11 @@ public class ErrorMessages {
 
     public static final String SKILL_IN_USE = "Skill cannot be deleted because it is referenced by employees: %s";
 
-    public static final String SKILL_INACTIVE = "Skill is inactive and cannot be assigned: %s";
-
     public static final String RESPONSIBILITY_TYPE_NOT_FOUND = "Responsibility type not found with id: %s";
 
     public static final String RESPONSIBILITY_TYPE_ALREADY_EXISTS = "Responsibility type already exists with code: %s";
 
     public static final String RESPONSIBILITY_TYPE_IN_USE = "Responsibility type cannot be deleted because it is referenced by employee responsibilities: %s";
-
-    public static final String RESPONSIBILITY_TYPE_INACTIVE = "Responsibility type is inactive and cannot be assigned: %s";
 
     public static final String EMPLOYEE_NOT_FOUND = "Employee not found with id: %s";
 
@@ -87,15 +83,13 @@ public class ErrorMessages {
 
     public static final String PROFILE_PHOTO_NOT_FOUND = "Profile photo not found for employee: %s";
 
-    public static final String PROFILE_PHOTO_ALREADY_EXISTS = "Profile photo already exists for employee: %s";
-
     public static final String INVALID_CONTENT_TYPE = "Unsupported content type: %s. Allowed: image/jpeg, image/png, image/webp";
 
     public static final String FILE_TOO_LARGE = "File size exceeds maximum allowed size of %s bytes";
 
-    public static final String S3_UPLOAD_FAILED = "Failed to upload file to object storage";
+    public static final String OBJECT_STORAGE_UPLOAD_FAILED = "Failed to upload file to object storage";
 
-    public static final String S3_DELETE_FAILED = "Failed to delete file from object storage";
+    public static final String OBJECT_STORAGE_DELETE_FAILED = "Failed to delete file from object storage";
 
     public static final String RESOURCE_DOES_NOT_BELONG_TO_EMPLOYEE = "Resource does not belong to employee: %s";
 

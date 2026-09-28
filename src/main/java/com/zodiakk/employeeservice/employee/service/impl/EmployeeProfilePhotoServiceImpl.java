@@ -1,7 +1,7 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
 import com.zodiakk.employeeservice.common.storage.ObjectStorageService;
-import com.zodiakk.employeeservice.config.s3.S3Properties;
+import com.zodiakk.employeeservice.config.minio.MinioProperties;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeProfilePhotoResponseDto;
 import com.zodiakk.employeeservice.employee.entity.Employee;
 import com.zodiakk.employeeservice.employee.entity.EmployeeProfilePhoto;
@@ -9,7 +9,7 @@ import com.zodiakk.employeeservice.employee.exception.employee.EmployeeNotFoundE
 import com.zodiakk.employeeservice.employee.exception.profilephoto.FileTooLargeException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.InvalidContentTypeException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.ProfilePhotoNotFoundException;
-import com.zodiakk.employeeservice.employee.exception.profilephoto.S3UploadFailedException;
+import com.zodiakk.employeeservice.employee.exception.profilephoto.ObjectStorageUploadFailedException;
 import com.zodiakk.employeeservice.employee.mapper.EmployeeProfilePhotoMapper;
 import com.zodiakk.employeeservice.employee.repository.EmployeeProfilePhotoRepository;
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
@@ -46,7 +46,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
 
     private final EmployeeProfilePhotoMapper employeeProfilePhotoMapper;
 
-    private final S3Properties s3Properties;
+    private final MinioProperties minioProperties;
 
     @Override
     @Transactional
@@ -62,7 +62,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
         try {
             objectStorageService.upload(objectKey, file.getInputStream(), contentType, file.getSize());
         } catch (IOException e) {
-            throw new S3UploadFailedException(e);
+            throw new ObjectStorageUploadFailedException(e);
         }
 
         EmployeeProfilePhoto photo = employeeProfilePhotoRepository.findByEmployeeId(employeeId)
@@ -131,8 +131,8 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
             throw new InvalidContentTypeException(contentType);
         }
 
-        if (file.getSize() > s3Properties.getMaxFileSize()) {
-            throw new FileTooLargeException(s3Properties.getMaxFileSize());
+        if (file.getSize() > minioProperties.getMaxFileSize()) {
+            throw new FileTooLargeException(minioProperties.getMaxFileSize());
         }
     }
 
