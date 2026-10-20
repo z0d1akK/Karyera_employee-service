@@ -20,7 +20,6 @@ databaseChangeLog:
                   name: user_id
                   type: UUID
                   constraints:
-                    nullable: false
                     unique: true
 
               - column:
@@ -38,6 +37,12 @@ databaseChangeLog:
               - column:
                   name: middle_name
                   type: VARCHAR(100)
+
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
 
               - column:
                   name: birth_date
@@ -124,3 +129,9 @@ databaseChangeLog:
             referencedTableName: departments
             referencedColumnNames: id
             constraintName: fk_employee_department
+
+        - sql:
+            dbms: postgresql
+            sql: |
+              CREATE UNIQUE INDEX ux_employees_email_lower
+                  ON employees (LOWER(email));

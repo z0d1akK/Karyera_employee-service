@@ -35,7 +35,7 @@ import java.util.UUID;
 @SuperBuilder
 public class Employee extends BaseEntity {
 
-    @Column(name = "user_id", nullable = false, unique = true)
+    @Column(name = "user_id", unique = true)
     private UUID userId;
 
     @Column(name = "first_name", nullable = false, length = 100)
@@ -46,6 +46,9 @@ public class Employee extends BaseEntity {
 
     @Column(name = "middle_name", length = 100)
     private String middleName;
+
+    @Column(name = "email", nullable = false, length = 255)
+    private String email;
 
     @Column(name = "birth_date")
     private LocalDate birthDate;

@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-create-employee-account-unlinks
+      author: zodiakk
+      changes:
+        - createTable:
+            tableName: employee_account_unlinks
+            columns:
+              - column:
+                  name: user_id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+
+              - column:
+                  name: employee_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+
+              - column:
+                  name: unlinked_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  constraints:
+                    nullable: false
+
+        - createIndex:
+            tableName: employee_account_unlinks
+            indexName: idx_employee_account_unlinks_employee
+            columns:
+              - column:
+                  name: employee_id

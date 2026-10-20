@@ -47,6 +47,8 @@ public class ErrorMessages {
 
     public static final String EMPLOYEE_ALREADY_EXISTS = "Employee already exists with user id: %s";
 
+    public static final String EMPLOYEE_ALREADY_EXISTS_BY_EMAIL = "Employee already exists with user email: %s";
+
     public static final String EMPLOYEE_TERMINATED = "Operation is not allowed for terminated employee: %s";
 
     public static final String EMPLOYEE_NOT_TERMINATED = "Employee must be terminated before deletion: %s";

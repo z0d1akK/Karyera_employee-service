@@ -2,9 +2,11 @@ package com.zodiakk.employeeservice.employee.service.impl;
 
 import com.zodiakk.employeeservice.common.dto.PageRequestDto;
 import com.zodiakk.employeeservice.common.storage.ObjectStorageService;
+import com.zodiakk.employeeservice.common.util.EmailUtils;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.filter.EmployeeFilterDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeUpdateRequestDto;
+import com.zodiakk.employeeservice.employee.dto.response.EmployeeRegistrationInfoDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSummaryResponseDto;
 import com.zodiakk.employeeservice.employee.entity.Department;
@@ -80,6 +82,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (employeeRepository.existsByUserId(request.getUserId())) {
             throw new EmployeeAlreadyExistsException(request.getUserId());
         }
+        if (employeeRepository.existsByEmailIgnoreCase(request.getEmail())) {
+            throw new EmployeeAlreadyExistsException(request.getEmail());
+        }
 
         EmploymentStatus status = request.getEmploymentStatus() != null
                 ? request.getEmploymentStatus()
@@ -92,6 +97,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         validateDates(request.getBirthDate(), request.getHireDate());
 
         Employee employee = employeeMapper.toEntity(request);
+
+        String normalizedEmail = EmailUtils.normalize(request.getEmail());
+        employee.setEmail(normalizedEmail);
+
         employee.setEmploymentStatus(status);
         employee.setPosition(resolveActivePosition(request.getPositionId()));
         employee.setGrade(resolveActiveGrade(request.getGradeId()));
@@ -114,6 +123,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = employeeRepository.findByUserId(userId)
                 .orElseThrow(() -> EmployeeNotFoundException.byUserId(userId));
         return toFullResponse(employee);
+    }
+
+    @Override
+    public EmployeeRegistrationInfoDto getRegistrationInfo(UUID employeeId){
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+
+        return new EmployeeRegistrationInfoDto(employee.getUserId(),employee.getEmail(), employee.getEmploymentStatus(), employee.getUserId());
     }
 
     @Override
@@ -154,6 +171,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         if (request.getEmploymentStatus() == EmploymentStatus.TERMINATED
                 && previousStatus != EmploymentStatus.TERMINATED) {
             closeActiveResponsibilities(employee.getId());
+        }
+
+        if (request.getEmail() != null) {
+
+            if (employeeRepository.existsByEmailIgnoreCaseAndIdNot(request.getEmail(), id)){
+                throw new EmployeeAlreadyExistsException(request.getEmail());
+            }
+            String normalizedEmail = EmailUtils.normalize(request.getEmail());
+            employee.setEmail(normalizedEmail);
         }
 
         return toFullResponse(employeeRepository.save(employee));

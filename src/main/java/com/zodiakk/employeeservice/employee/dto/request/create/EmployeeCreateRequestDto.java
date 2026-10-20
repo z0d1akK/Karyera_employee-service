@@ -3,11 +3,7 @@ package com.zodiakk.employeeservice.employee.dto.request.create;
 import com.zodiakk.employeeservice.common.validation.ValidationMessages;
 import com.zodiakk.employeeservice.employee.entity.enums.EmploymentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,6 +38,12 @@ public class EmployeeCreateRequestDto {
     @Schema(description = "Employee middle name", example = "Ivanovich")
     @Size(max = 100, message = ValidationMessages.MIDDLE_NAME_SIZE)
     private String middleName;
+
+    @Schema(description = "Corporate email of the employee", example = "test@company.com")
+    @NotBlank
+    @Email
+    @Size(max = 255)
+    private String email;
 
     @Schema(description = "Employee birth date", example = "1995-05-15")
     @Past(message = ValidationMessages.BIRTH_DATE_PAST)

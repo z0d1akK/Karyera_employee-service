@@ -4,6 +4,7 @@ import com.zodiakk.employeeservice.common.dto.PageRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.filter.EmployeeFilterDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeUpdateRequestDto;
+import com.zodiakk.employeeservice.employee.dto.response.EmployeeRegistrationInfoDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSummaryResponseDto;
 import com.zodiakk.employeeservice.employee.entity.enums.EmploymentStatus;
@@ -18,6 +19,8 @@ public interface EmployeeService {
     EmployeeResponseDto getById(UUID id);
 
     EmployeeResponseDto getByUserId(UUID userId);
+
+    EmployeeRegistrationInfoDto getRegistrationInfo(UUID employeeId);
 
     Page<EmployeeSummaryResponseDto> findAll(EmployeeFilterDto filter, PageRequestDto pageRequest);
 

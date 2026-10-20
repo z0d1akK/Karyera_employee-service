@@ -35,6 +35,9 @@ public class EmployeeResponseDto {
     @Schema(description = "Employee middle name")
     private String middleName;
 
+    @Schema(description = "Corporate email of the employee", example = "test@company.com")
+    private String email;
+
     @Schema(description = "Employee birth date")
     private LocalDate birthDate;
 
