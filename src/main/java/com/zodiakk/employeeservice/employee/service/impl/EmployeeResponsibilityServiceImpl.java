@@ -1,5 +1,6 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.CatalogNames;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeResponsibilityCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeResponsibilityUpdateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeResponsibilityResponseDto;
@@ -24,6 +25,7 @@ import com.zodiakk.employeeservice.employee.repository.ResponsibilityTypeReposit
 import com.zodiakk.employeeservice.employee.service.EmployeeResponsibilityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     private final EmployeeResponsibilityMapper employeeResponsibilityMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto assign(
@@ -82,6 +85,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public List<EmployeeResponsibilityResponseDto> listByEmployee(UUID employeeId) {
         findEmployee(employeeId);
 
@@ -93,6 +97,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#responsibleEmployeeId)")
     public List<EmployeeResponsibilityResponseDto> listByResponsible(UUID responsibleEmployeeId) {
         findEmployee(responsibleEmployeeId);
 
@@ -104,6 +109,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto close(UUID responsibilityId, LocalDate endDate) {
@@ -123,6 +129,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponsibilityResponseDto update(UUID responsibilityId,
@@ -187,6 +194,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID responsibilityId) {
@@ -325,7 +333,7 @@ public class EmployeeResponsibilityServiceImpl implements EmployeeResponsibility
 
         if (!Boolean.TRUE.equals(type.getActive())) {
             throw new CatalogInactiveException(
-                    "ResponsibilityType",
+                    CatalogNames.RESPONSIBILITY_TYPE,
                     typeId
             );
         }

@@ -1,5 +1,6 @@
 package com.zodiakk.employeeservice.outbox.service;
 
+import com.zodiakk.employeeservice.common.exception.ErrorMessages;
 import com.zodiakk.employeeservice.outbox.dto.OutboxEventEnvelope;
 import com.zodiakk.employeeservice.outbox.entity.OutboxEvent;
 import com.zodiakk.employeeservice.outbox.entity.OutboxEventStatus;
@@ -24,13 +25,7 @@ public class OutboxEventService {
     private final ObjectMapper objectMapper;
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void saveEvent(
-            UUID aggregateId,
-            String aggregateType,
-            String eventType,
-            int eventVersion,
-            Object payload
-    ) {
+    public void saveEvent(UUID aggregateId, String aggregateType, String eventType, int eventVersion, Object payload) {
         UUID eventId = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
@@ -62,7 +57,7 @@ public class OutboxEventService {
 
         } catch (JacksonException ex) {
             throw new IllegalStateException(
-                    "Failed to serialize outbox event: " + eventType,
+                    ErrorMessages.OUTBOX_EVENT_SERIALIZATION_FAILED.formatted(eventType),
                     ex
             );
         }

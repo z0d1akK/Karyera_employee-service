@@ -1,5 +1,7 @@
 package com.zodiakk.employeeservice.integration.auth.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.KafkaEventConstants;
+import com.zodiakk.employeeservice.common.exception.ErrorMessages;
 import com.zodiakk.employeeservice.employee.entity.Employee;
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.integration.auth.entity.EmployeeAccountUnlink;
@@ -20,8 +22,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EmployeeAccountLinkServiceImpl
-        implements EmployeeAccountLinkService {
+public class EmployeeAccountLinkServiceImpl implements EmployeeAccountLinkService {
 
     private final EmployeeRepository employeeRepository;
 
@@ -33,14 +34,10 @@ public class EmployeeAccountLinkServiceImpl
 
     @Override
     @Transactional
-    public void linkAccount(
-            UUID eventId,
-            UUID employeeId,
-            UUID userId
-    ) {
+    public void linkAccount(UUID eventId, UUID employeeId, UUID userId) {
         Employee employee = employeeRepository.findByIdForUpdate(employeeId)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Employee not found: " + employeeId
+                        ErrorMessages.EMPLOYEE_NOT_FOUND.formatted(employeeId)
                 ));
 
         int registered = processedEventRepository.registerIfAbsent(eventId);
@@ -51,7 +48,8 @@ public class EmployeeAccountLinkServiceImpl
 
         if (unlinkRepository.existsById(userId)) {
             log.info(
-                    "Ignoring obsolete USER_CREATED: userId={}",
+                    "Ignoring obsolete {}: userId={}",
+                    KafkaEventConstants.USER_CREATED,
                     userId
             );
             return;
@@ -76,14 +74,10 @@ public class EmployeeAccountLinkServiceImpl
 
     @Override
     @Transactional
-    public void unlinkAccount(
-            UUID eventId,
-            UUID employeeId,
-            UUID userId
-    ) {
+    public void unlinkAccount(UUID eventId, UUID employeeId, UUID userId) {
         Employee employee = employeeRepository.findByIdForUpdate(employeeId)
                 .orElseThrow(() -> new IllegalStateException(
-                        "Employee not found: " + employeeId
+                        ErrorMessages.EMPLOYEE_NOT_FOUND.formatted(employeeId)
                 ));
 
         int registered = processedEventRepository.registerIfAbsent(eventId);
@@ -94,26 +88,30 @@ public class EmployeeAccountLinkServiceImpl
 
         UUID existingUserId = employee.getUserId();
 
-        if (existingUserId != null && !existingUserId.equals(userId)) {
-            throw new EmployeeAccountLinkConflictException(
+        boolean staleEvent = existingUserId != null && !existingUserId.equals(userId);
+
+        if (staleEvent) {
+            log.warn(
+                    "Ignoring stale {} for employee {}: linked={}, event={}",
+                    KafkaEventConstants.USER_DELETED,
                     employeeId,
                     existingUserId,
                     userId
             );
-        }
-
-        if (existingUserId != null) {
+        } else if (existingUserId != null) {
             employee.setUserId(null);
             employeeRepository.saveAndFlush(employee);
         }
 
-        unlinkRepository.save(
-                EmployeeAccountUnlink.builder()
-                        .userId(userId)
-                        .employeeId(employeeId)
-                        .unlinkedAt(OffsetDateTime.now(ZoneOffset.UTC))
-                        .build()
-        );
+        if (!unlinkRepository.existsById(userId)) {
+            unlinkRepository.save(
+                    EmployeeAccountUnlink.builder()
+                            .userId(userId)
+                            .employeeId(employeeId)
+                            .unlinkedAt(OffsetDateTime.now(ZoneOffset.UTC))
+                            .build()
+            );
+        }
 
         eventService.recordAccountUnlinked(userId, employeeId);
     }

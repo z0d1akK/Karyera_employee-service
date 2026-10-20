@@ -15,6 +15,7 @@ import com.zodiakk.employeeservice.employee.repository.ExperienceRepository;
 import com.zodiakk.employeeservice.employee.service.ExperienceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     private final ExperienceMapper experienceMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public ExperienceResponseDto add(UUID employeeId, ExperienceCreateRequestDto request) {
@@ -49,11 +51,13 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public ExperienceResponseDto getById(UUID employeeId, UUID experienceId) {
         return experienceMapper.toResponseDto(findOwnedExperience(employeeId, experienceId));
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public List<ExperienceResponseDto> listByEmployee(UUID employeeId) {
         findEmployee(employeeId);
         return experienceRepository.findAllByEmployeeIdOrderByStartDateDesc(employeeId).stream()
@@ -62,6 +66,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public ExperienceResponseDto update(UUID employeeId, UUID experienceId, ExperienceUpdateRequestDto request) {
@@ -77,6 +82,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId, UUID experienceId) {

@@ -14,6 +14,7 @@ import com.zodiakk.employeeservice.employee.repository.MilitaryObligationReposit
 import com.zodiakk.employeeservice.employee.service.MilitaryObligationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     private final MilitaryObligationMapper militaryObligationMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto create(UUID employeeId, MilitaryObligationCreateRequestDto request) {
@@ -53,6 +55,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public MilitaryObligationResponseDto getByEmployeeId(UUID employeeId) {
         findEmployee(employeeId);
 
@@ -62,6 +65,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto update(UUID employeeId, MilitaryObligationUpdateRequestDto request) {
@@ -75,6 +79,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public MilitaryObligationResponseDto upsert(UUID employeeId, MilitaryObligationCreateRequestDto request) {
@@ -101,6 +106,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId) {

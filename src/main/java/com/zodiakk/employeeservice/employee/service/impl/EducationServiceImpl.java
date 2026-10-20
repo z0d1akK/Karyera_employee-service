@@ -15,6 +15,7 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.service.EducationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +37,7 @@ public class EducationServiceImpl implements EducationService {
     private final EducationMapper educationMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EducationResponseDto add(UUID employeeId, EducationCreateRequestDto request) {
@@ -49,11 +51,13 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public EducationResponseDto getById(UUID employeeId, UUID educationId) {
         return educationMapper.toResponseDto(findOwnedEducation(employeeId, educationId));
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public List<EducationResponseDto> listByEmployee(UUID employeeId) {
         findEmployee(employeeId);
         return educationRepository.findAllByEmployeeIdOrderByStartDateDesc(employeeId).stream()
@@ -62,6 +66,7 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EducationResponseDto update(UUID employeeId, UUID educationId, EducationUpdateRequestDto request) {
@@ -77,6 +82,7 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId, UUID educationId) {

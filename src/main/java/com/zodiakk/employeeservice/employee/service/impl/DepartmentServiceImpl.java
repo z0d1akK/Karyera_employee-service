@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentMapper departmentMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public DepartmentResponseDto create(DepartmentCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(cacheNames = DEPARTMENTS, key = "#id")
     public DepartmentResponseDto getById(UUID id) {
         return departmentMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<DepartmentResponseDto> findAll(DepartmentFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = DepartmentPageableFactory.create(pageRequest);
 
@@ -68,6 +72,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public DepartmentResponseDto update(UUID id, DepartmentUpdateRequestDto request) {
@@ -86,6 +91,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void deactivate(UUID id) {
@@ -98,6 +104,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void activate(UUID id) {
@@ -110,6 +117,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = DEPARTMENTS, allEntries = true)
     public void delete(UUID id) {

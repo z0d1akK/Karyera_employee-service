@@ -1,6 +1,8 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.CatalogNames;
 import com.zodiakk.employeeservice.common.dto.PageRequestDto;
+import com.zodiakk.employeeservice.common.exception.ErrorMessages;
 import com.zodiakk.employeeservice.common.storage.ObjectStorageService;
 import com.zodiakk.employeeservice.common.util.EmailUtils;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeCreateRequestDto;
@@ -38,11 +40,16 @@ import com.zodiakk.employeeservice.employee.repository.SpecializationRepository;
 import com.zodiakk.employeeservice.employee.repository.specification.employee.EmployeePageableFactory;
 import com.zodiakk.employeeservice.employee.repository.specification.employee.EmployeeSpecification;
 import com.zodiakk.employeeservice.employee.service.EmployeeService;
+import com.zodiakk.employeeservice.security.access.EmployeeAccessService;
+import com.zodiakk.employeeservice.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +82,10 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeResponsibilityMapper employeeResponsibilityMapper;
 
+    private final EmployeeAccessService employeeAccessService;
+
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto create(EmployeeCreateRequestDto request) {
@@ -112,12 +122,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#id)")
     @Cacheable(cacheNames = EMPLOYEES, key = "'id:' + #id")
     public EmployeeResponseDto getById(UUID id) {
         return toFullResponse(findById(id));
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewUser(#userId)")
     @Cacheable(cacheNames = EMPLOYEES, key = "'user:' + #userId")
     public EmployeeResponseDto getByUserId(UUID userId) {
         Employee employee = employeeRepository.findByUserId(userId)
@@ -126,26 +138,44 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
-    public EmployeeRegistrationInfoDto getRegistrationInfo(UUID employeeId){
+    @PreAuthorize("hasAnyRole('INTERNAL_SERVICE', 'HR', 'ADMIN')")
+    public EmployeeRegistrationInfoDto getRegistrationInfo(UUID employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
 
-        return new EmployeeRegistrationInfoDto(employee.getUserId(),employee.getEmail(), employee.getEmploymentStatus(), employee.getUserId());
+        return new EmployeeRegistrationInfoDto(
+                employee.getId(),
+                employee.getEmail(),
+                employee.getEmploymentStatus(),
+                employee.getUserId()
+        );
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canListEmployees()")
     public Page<EmployeeSummaryResponseDto> findAll(EmployeeFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = EmployeePageableFactory.create(pageRequest);
 
-        return employeeRepository.findAll(EmployeeSpecification.filter(filter), pageable)
+        Specification<Employee> specification = EmployeeSpecification.filter(filter);
+
+        if (employeeAccessService.isManagerOnly()) {
+            specification = specification.and(
+                    EmployeeSpecification.subordinatesOf(SecurityUtils.getCurrentUserId())
+            );
+        }
+
+        return employeeRepository.findAll(specification, pageable)
                 .map(employeeMapper::toSummaryResponseDto);
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#id)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto update(UUID id, EmployeeUpdateRequestDto request) {
         Employee employee = findById(id);
+
+        validateSelfUpdateFields(request);
 
         LocalDate birthDate = request.getBirthDate() != null ? request.getBirthDate() : employee.getBirthDate();
         LocalDate hireDate = request.getHireDate() != null ? request.getHireDate() : employee.getHireDate();
@@ -174,8 +204,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         if (request.getEmail() != null) {
-
-            if (employeeRepository.existsByEmailIgnoreCaseAndIdNot(request.getEmail(), id)){
+            if (employeeRepository.existsByEmailIgnoreCaseAndIdNot(request.getEmail(), id)) {
                 throw new EmployeeAlreadyExistsException(request.getEmail());
             }
             String normalizedEmail = EmailUtils.normalize(request.getEmail());
@@ -186,6 +215,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto changeStatus(UUID id, EmploymentStatus status) {
@@ -202,6 +232,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID id) {
@@ -246,6 +277,22 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeResponsibilityRepository.saveAll(active);
     }
 
+    private void validateSelfUpdateFields(EmployeeUpdateRequestDto request) {
+        if (employeeAccessService.isPrivileged()) {
+            return;
+        }
+
+        if (request.getHireDate() != null
+                || request.getPositionId() != null
+                || request.getSpecializationId() != null
+                || request.getGradeId() != null
+                || request.getDepartmentId() != null
+                || request.getMaxSubordinates() != null
+                || request.getEmploymentStatus() != null) {
+            throw new AccessDeniedException(ErrorMessages.ACCESS_DENIED);
+        }
+    }
+
     private void validateDates(LocalDate birthDate, LocalDate hireDate) {
         if (hireDate == null) {
             return;
@@ -263,14 +310,14 @@ public class EmployeeServiceImpl implements EmployeeService {
     private Position resolveActivePosition(UUID positionId) {
         Position position = positionRepository.findById(positionId)
                 .orElseThrow(() -> new PositionNotFoundException(positionId));
-        requireActive("Position", positionId, position.getActive());
+        requireActive(CatalogNames.POSITION, positionId, position.getActive());
         return position;
     }
 
     private Grade resolveActiveGrade(UUID gradeId) {
         Grade grade = gradeRepository.findById(gradeId)
                 .orElseThrow(() -> new GradeNotFoundException(gradeId));
-        requireActive("Grade", gradeId, grade.getActive());
+        requireActive(CatalogNames.GRADE, gradeId, grade.getActive());
         return grade;
     }
 
@@ -280,7 +327,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentNotFoundException(departmentId));
-        requireActive("Department", departmentId, department.getActive());
+        requireActive(CatalogNames.DEPARTMENT, departmentId, department.getActive());
         return department;
     }
 
@@ -290,7 +337,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         Specialization specialization = specializationRepository.findById(specializationId)
                 .orElseThrow(() -> new SpecializationNotFoundException(specializationId));
-        requireActive("Specialization", specializationId, specialization.getActive());
+        requireActive(CatalogNames.SPECIALIZATION, specializationId, specialization.getActive());
         return specialization;
     }
 

@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class PositionServiceImpl implements PositionService {
     private final PositionMapper positionMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public PositionResponseDto create(PositionCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(cacheNames = POSITIONS, key = "#id")
     public PositionResponseDto getById(UUID id) {
         return positionMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<PositionResponseDto> findAll(PositionFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = PositionPageableFactory.create(pageRequest);
 
@@ -68,6 +72,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public PositionResponseDto update(UUID id, PositionUpdateRequestDto request) {
@@ -86,6 +91,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void deactivate(UUID id) {
@@ -98,6 +104,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void activate(UUID id) {
@@ -110,6 +117,7 @@ public class PositionServiceImpl implements PositionService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = POSITIONS, allEntries = true)
     public void delete(UUID id) {

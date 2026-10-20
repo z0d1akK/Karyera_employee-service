@@ -17,6 +17,11 @@ public interface EmployeeResponsibilityRepository extends JpaRepository<Employee
 
     List<EmployeeResponsibility> findAllByResponsibleEmployeeId(UUID responsibleEmployeeId);
 
+    boolean existsByEmployeeIdAndResponsibleEmployeeIdAndEndDateIsNull(
+            UUID employeeId,
+            UUID responsibleEmployeeId
+    );
+
     Optional<EmployeeResponsibility>
     findByEmployeeIdAndResponsibleEmployeeIdAndResponsibilityTypeIdAndEndDateIsNull
             (UUID employeeId, UUID responsibleEmployeeId, UUID responsibilityTypeId);

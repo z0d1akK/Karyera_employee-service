@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class SkillServiceImpl implements SkillService {
     private final SkillMapper skillMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public SkillResponseDto create(SkillCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(cacheNames = SKILLS, key = "#id")
     public SkillResponseDto getById(UUID id) {
         return skillMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<SkillResponseDto> findAll(SkillFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = SkillPageableFactory.create(pageRequest);
 
@@ -68,6 +72,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public SkillResponseDto update(UUID id, SkillUpdateRequestDto request) {
@@ -86,6 +91,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void deactivate(UUID id) {
@@ -98,6 +104,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void activate(UUID id) {
@@ -110,6 +117,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SKILLS, allEntries = true)
     public void delete(UUID id) {

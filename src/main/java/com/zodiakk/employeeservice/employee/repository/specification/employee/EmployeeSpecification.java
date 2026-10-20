@@ -2,12 +2,16 @@ package com.zodiakk.employeeservice.employee.repository.specification.employee;
 
 import com.zodiakk.employeeservice.employee.dto.request.filter.EmployeeFilterDto;
 import com.zodiakk.employeeservice.employee.entity.Employee;
+import com.zodiakk.employeeservice.employee.entity.EmployeeResponsibility;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @UtilityClass
 public class EmployeeSpecification {
@@ -67,6 +71,24 @@ public class EmployeeSpecification {
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static Specification<Employee> subordinatesOf(UUID managerUserId) {
+        return (root, query, criteriaBuilder) -> {
+            Subquery<UUID> subquery = query.subquery(UUID.class);
+            Root<EmployeeResponsibility> responsibility = subquery.from(EmployeeResponsibility.class);
+
+            subquery.select(responsibility.get("employee").get("id"))
+                    .where(
+                            criteriaBuilder.equal(
+                                    responsibility.get("responsibleEmployee").get("userId"),
+                                    managerUserId
+                            ),
+                            criteriaBuilder.isNull(responsibility.get("endDate"))
+                    );
+
+            return root.get("id").in(subquery);
         };
     }
 }

@@ -1,21 +1,18 @@
 package com.zodiakk.employeeservice.integration.auth.exception;
 
+import com.zodiakk.employeeservice.common.exception.ErrorMessages;
+
 import java.util.UUID;
 
 public class EmployeeAccountLinkConflictException extends RuntimeException {
 
-    public EmployeeAccountLinkConflictException(
-            UUID employeeId,
-            UUID existingUserId,
-            UUID requestedUserId
-    ) {
+    public EmployeeAccountLinkConflictException(UUID employeeId, UUID existingUserId, UUID requestedUserId) {
         super(
-                "Employee %s is already linked to user %s; requested user %s"
-                        .formatted(
-                                employeeId,
-                                existingUserId,
-                                requestedUserId
-                        )
+                ErrorMessages.ACCOUNT_ALREADY_LINKED.formatted(
+                        employeeId,
+                        existingUserId,
+                        requestedUserId
+                )
         );
     }
 }

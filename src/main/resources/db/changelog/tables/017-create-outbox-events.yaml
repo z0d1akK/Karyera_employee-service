@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 0-17create-outbox-events
+      id: 017-create-outbox-events
       author: zodiakk
       changes:
         - createTable:

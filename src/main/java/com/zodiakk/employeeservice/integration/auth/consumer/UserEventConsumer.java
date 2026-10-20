@@ -1,5 +1,7 @@
 package com.zodiakk.employeeservice.integration.auth.consumer;
 
+import com.zodiakk.employeeservice.common.constants.KafkaEventConstants;
+import com.zodiakk.employeeservice.common.exception.ErrorMessages;
 import com.zodiakk.employeeservice.integration.auth.dto.UserCreatedEvent;
 import com.zodiakk.employeeservice.integration.auth.dto.UserDeletedEvent;
 import com.zodiakk.employeeservice.integration.auth.dto.UserEventEnvelope;
@@ -27,14 +29,14 @@ public class UserEventConsumer {
         UserEventEnvelope envelope =
                 objectMapper.readValue(message, UserEventEnvelope.class);
 
-        if (envelope.eventVersion() != 1) {
+        if (envelope.eventVersion() != KafkaEventConstants.EVENT_VERSION_V1) {
             throw new IllegalArgumentException(
-                    "Unsupported event version: " + envelope.eventVersion()
+                    ErrorMessages.UNSUPPORTED_EVENT_VERSION.formatted(envelope.eventVersion())
             );
         }
 
         switch (envelope.eventType()) {
-            case "USER_CREATED" -> {
+            case KafkaEventConstants.USER_CREATED -> {
                 UserCreatedEvent event = objectMapper.treeToValue(
                         envelope.payload(),
                         UserCreatedEvent.class
@@ -47,7 +49,7 @@ public class UserEventConsumer {
                 );
             }
 
-            case "USER_DELETED" -> {
+            case KafkaEventConstants.USER_DELETED -> {
                 UserDeletedEvent event = objectMapper.treeToValue(
                         envelope.payload(),
                         UserDeletedEvent.class
@@ -61,7 +63,7 @@ public class UserEventConsumer {
             }
 
             default -> throw new IllegalArgumentException(
-                    "Unsupported event type: " + envelope.eventType()
+                    ErrorMessages.UNSUPPORTED_EVENT_TYPE.formatted(envelope.eventType())
             );
         }
 

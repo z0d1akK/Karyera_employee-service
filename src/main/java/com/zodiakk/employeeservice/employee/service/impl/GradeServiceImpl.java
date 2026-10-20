@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class GradeServiceImpl implements GradeService {
     private final GradeMapper gradeMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = GRADES, allEntries = true)
     public GradeResponseDto create(GradeCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(value = GRADES, key = "#id")
     public GradeResponseDto getById(UUID id) {
         return gradeMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<GradeResponseDto> findAll(GradeFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = GradePageableFactory.create(pageRequest);
 
@@ -68,6 +72,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = GRADES, allEntries = true)
     public GradeResponseDto update(UUID id, GradeUpdateRequestDto request) {
@@ -92,6 +97,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void deactivate(UUID id) {
@@ -104,6 +110,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void activate(UUID id) {
@@ -116,6 +123,7 @@ public class GradeServiceImpl implements GradeService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = GRADES, allEntries = true)
     public void delete(UUID id) {

@@ -1,28 +1,30 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.ProfilePhotoConstants;
 import com.zodiakk.employeeservice.common.storage.ObjectStorageService;
 import com.zodiakk.employeeservice.config.minio.MinioProperties;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeProfilePhotoResponseDto;
 import com.zodiakk.employeeservice.employee.entity.Employee;
 import com.zodiakk.employeeservice.employee.entity.EmployeeProfilePhoto;
 import com.zodiakk.employeeservice.employee.exception.employee.EmployeeNotFoundException;
+import com.zodiakk.employeeservice.employee.exception.profilephoto.EmptyFileException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.FileTooLargeException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.InvalidContentTypeException;
-import com.zodiakk.employeeservice.employee.exception.profilephoto.ProfilePhotoNotFoundException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.ObjectStorageUploadFailedException;
+import com.zodiakk.employeeservice.employee.exception.profilephoto.ProfilePhotoNotFoundException;
 import com.zodiakk.employeeservice.employee.mapper.EmployeeProfilePhotoMapper;
 import com.zodiakk.employeeservice.employee.repository.EmployeeProfilePhotoRepository;
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeProfilePhotoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Locale;
-import java.util.Set;
 import java.util.UUID;
 
 import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
@@ -31,12 +33,6 @@ import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoService {
-
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-    );
 
     private final EmployeeProfilePhotoRepository employeeProfilePhotoRepository;
 
@@ -49,6 +45,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
     private final MinioProperties minioProperties;
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeProfilePhotoResponseDto upload(UUID employeeId, MultipartFile file) {
@@ -57,7 +54,11 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
 
         String contentType = file.getContentType();
         String extension = resolveExtension(contentType, file.getOriginalFilename());
-        String objectKey = "employees/%s/profile/%s.%s".formatted(employeeId, UUID.randomUUID(), extension);
+        String objectKey = ProfilePhotoConstants.OBJECT_KEY_TEMPLATE.formatted(
+                employeeId,
+                UUID.randomUUID(),
+                extension
+        );
 
         try {
             objectStorageService.upload(objectKey, file.getInputStream(), contentType, file.getSize());
@@ -94,6 +95,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public EmployeeProfilePhotoResponseDto getByEmployeeId(UUID employeeId) {
         findEmployee(employeeId);
         EmployeeProfilePhoto photo = employeeProfilePhotoRepository.findByEmployeeId(employeeId)
@@ -102,6 +104,7 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void delete(UUID employeeId) {
@@ -123,11 +126,12 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
 
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new InvalidContentTypeException("empty");
+            throw new EmptyFileException();
         }
 
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
+        if (contentType == null
+                || !ProfilePhotoConstants.ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
             throw new InvalidContentTypeException(contentType);
         }
 
@@ -139,9 +143,9 @@ public class EmployeeProfilePhotoServiceImpl implements EmployeeProfilePhotoServ
     private String resolveExtension(String contentType, String originalFilename) {
         if (contentType != null) {
             return switch (contentType.toLowerCase(Locale.ROOT)) {
-                case "image/jpeg" -> "jpg";
-                case "image/png" -> "png";
-                case "image/webp" -> "webp";
+                case ProfilePhotoConstants.CONTENT_TYPE_JPEG -> "jpg";
+                case ProfilePhotoConstants.CONTENT_TYPE_PNG -> "png";
+                case ProfilePhotoConstants.CONTENT_TYPE_WEBP -> "webp";
                 default -> "bin";
             };
         }

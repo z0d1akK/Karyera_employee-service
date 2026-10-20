@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     private final SpecializationMapper specializationMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public SpecializationResponseDto create(SpecializationCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(cacheNames = SPECIALIZATIONS, key = "#id")
     public SpecializationResponseDto getById(UUID id) {
         return specializationMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<SpecializationResponseDto> findAll(SpecializationFilterDto filter, PageRequestDto pageRequest) {
         Pageable pageable = SpecializationPageableFactory.create(pageRequest);
 
@@ -68,6 +72,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public SpecializationResponseDto update(UUID id, SpecializationUpdateRequestDto request) {
@@ -86,6 +91,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void deactivate(UUID id) {
@@ -98,6 +104,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void activate(UUID id) {
@@ -110,6 +117,7 @@ public class SpecializationServiceImpl implements SpecializationService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = SPECIALIZATIONS, allEntries = true)
     public void delete(UUID id) {

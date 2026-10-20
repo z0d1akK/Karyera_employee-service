@@ -1,5 +1,6 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.CatalogNames;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeSkillCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeSkillUpdateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSkillResponseDto;
@@ -19,6 +20,7 @@ import com.zodiakk.employeeservice.employee.repository.SkillRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeSkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,6 +44,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     private final EmployeeSkillMapper employeeSkillMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeSkillResponseDto add(UUID employeeId, EmployeeSkillCreateRequestDto request) {
@@ -67,6 +70,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
     public List<EmployeeSkillResponseDto> listByEmployee(UUID employeeId) {
         findEmployee(employeeId);
 
@@ -78,6 +82,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeSkillResponseDto update(UUID employeeId, UUID employeeSkillId, EmployeeSkillUpdateRequestDto request) {
@@ -100,6 +105,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public void remove(UUID employeeId, UUID employeeSkillId) {
@@ -128,7 +134,7 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
 
         if (!Boolean.TRUE.equals(skill.getActive())) {
             throw new CatalogInactiveException(
-                    "Skill",
+                    CatalogNames.SKILL,
                     skillId
             );
         }

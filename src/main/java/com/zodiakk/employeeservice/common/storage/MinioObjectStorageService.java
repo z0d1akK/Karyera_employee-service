@@ -1,8 +1,8 @@
 package com.zodiakk.employeeservice.common.storage;
 
 import com.zodiakk.employeeservice.config.minio.MinioProperties;
+import com.zodiakk.employeeservice.employee.exception.profilephoto.ObjectStorageDeleteFailedException;
 import com.zodiakk.employeeservice.employee.exception.profilephoto.ObjectStorageUploadFailedException;
-import com.zodiakk.employeeservice.employee.exception.profilephoto.ObjectStotageDeleteFailedException;
 import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -22,12 +22,7 @@ public class MinioObjectStorageService implements ObjectStorageService {
     private final MinioProperties minioProperties;
 
     @Override
-    public void upload(
-            String objectKey,
-            InputStream inputStream,
-            String contentType,
-            long contentLength
-    ) {
+    public void upload(String objectKey, InputStream inputStream, String contentType, long contentLength) {
         try {
             minioClient.putObject(
                     PutObjectArgs.builder()
@@ -52,7 +47,7 @@ public class MinioObjectStorageService implements ObjectStorageService {
                             .build()
             );
         } catch (Exception e) {
-            throw new ObjectStotageDeleteFailedException(e);
+            throw new ObjectStorageDeleteFailedException(e);
         }
     }
 

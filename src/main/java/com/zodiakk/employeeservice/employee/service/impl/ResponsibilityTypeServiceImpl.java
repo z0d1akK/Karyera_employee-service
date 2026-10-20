@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     private final ResponsibilityTypeMapper responsibilityTypeMapper;
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public ResponsibilityTypeResponseDto create(ResponsibilityTypeCreateRequestDto request) {
@@ -53,12 +55,14 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     @Cacheable(cacheNames = RESPONSIBILITY_TYPES, key = "#id")
     public ResponsibilityTypeResponseDto getById(UUID id) {
         return responsibilityTypeMapper.toResponseDto(findById(id));
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public Page<ResponsibilityTypeResponseDto> findAll(
             ResponsibilityTypeFilterDto filter,
             PageRequestDto pageRequest
@@ -71,6 +75,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public ResponsibilityTypeResponseDto update(UUID id, ResponsibilityTypeUpdateRequestDto request) {
@@ -89,6 +94,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void deactivate(UUID id) {
@@ -101,6 +107,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void activate(UUID id) {
@@ -113,6 +120,7 @@ public class ResponsibilityTypeServiceImpl implements ResponsibilityTypeService 
     }
 
     @Override
+    @PreAuthorize("@employeeAccess.canManageCatalogs()")
     @Transactional
     @CacheEvict(cacheNames = RESPONSIBILITY_TYPES, allEntries = true)
     public void delete(UUID id) {
