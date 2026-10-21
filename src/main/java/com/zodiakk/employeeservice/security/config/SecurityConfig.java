@@ -1,21 +1,29 @@
 package com.zodiakk.employeeservice.security.config;
 
+import com.zodiakk.employeeservice.common.constants.Headers;
 import com.zodiakk.employeeservice.common.constants.SecurityConstants;
-import com.zodiakk.employeeservice.security.filter.GatewayAuthenticationFilter;
 import com.zodiakk.employeeservice.security.filter.InternalApiKeyFilter;
 import com.zodiakk.employeeservice.security.handler.CustomAccessDeniedHandler;
 import com.zodiakk.employeeservice.security.handler.CustomAuthenticationEntryPoint;
+import com.zodiakk.employeeservice.security.principal.CurrentUser;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
+
+import java.util.List;
+import java.util.UUID;
 
 @Configuration
 @EnableMethodSecurity
@@ -57,8 +65,8 @@ public class SecurityConfig {
 
         CustomAuthenticationEntryPoint entryPoint = new CustomAuthenticationEntryPoint();
 
-        GatewayAuthenticationFilter gatewayAuthenticationFilter =
-                new GatewayAuthenticationFilter();
+        RequestHeaderAuthenticationFilter gatewayAuthenticationFilter =
+                gatewayAuthenticationFilter();
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -88,5 +96,55 @@ public class SecurityConfig {
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .build();
+    }
+
+    private RequestHeaderAuthenticationFilter gatewayAuthenticationFilter() {
+        RequestHeaderAuthenticationFilter filter = new RequestHeaderAuthenticationFilter() {
+            @Override
+            protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
+                String userId = request.getHeader(Headers.USER_ID);
+                String role = request.getHeader(Headers.USER_ROLE);
+                String email = request.getHeader(Headers.USER_EMAIL);
+
+                if (userId == null || role == null || email == null) {
+                    return null;
+                }
+
+                try {
+                    return CurrentUser.builder()
+                            .userId(UUID.fromString(userId))
+                            .role(toAuthority(role))
+                            .email(email)
+                            .build();
+                } catch (IllegalArgumentException ex) {
+                    return null;
+                }
+            }
+
+            @Override
+            protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
+                return null;
+            }
+        };
+
+        filter.setPrincipalRequestHeader(Headers.USER_ID);
+        filter.setExceptionIfHeaderMissing(false);
+        filter.setAuthenticationManager(authentication -> {
+            CurrentUser currentUser = (CurrentUser) authentication.getPrincipal();
+
+            return new UsernamePasswordAuthenticationToken(
+                    currentUser,
+                    null,
+                    List.of(new SimpleGrantedAuthority(currentUser.getRole()))
+            );
+        });
+
+        return filter;
+    }
+
+    private String toAuthority(String role) {
+        return role.startsWith(SecurityConstants.ROLE_PREFIX)
+                ? role
+                : SecurityConstants.ROLE_PREFIX + role;
     }
 }
