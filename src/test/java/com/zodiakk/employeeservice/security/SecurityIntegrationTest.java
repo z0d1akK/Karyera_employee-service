@@ -20,14 +20,14 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("rejects an anonymous request")
     void shouldRejectAnonymousRequest() throws Exception {
-        mockMvc.perform(get("/api/employees/" + UUID.randomUUID()))
+        mockMvc.perform(get("/api/v1/employees/" + UUID.randomUUID()))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @DisplayName("rejects a request with a malformed user id")
     void shouldRejectMalformedUserId() throws Exception {
-        mockMvc.perform(get("/api/employees/" + UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/employees/" + UUID.randomUUID())
                         .header(USER_ID_HEADER, "not-a-uuid")
                         .header(USER_ROLE_HEADER, "HR")
                         .header(USER_EMAIL_HEADER, "hr@company.com"))
@@ -37,7 +37,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("rejects a request with incomplete gateway headers")
     void shouldRejectIncompleteHeaders() throws Exception {
-        mockMvc.perform(get("/api/employees/" + UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/employees/" + UUID.randomUUID())
                         .header(USER_ID_HEADER, UUID.randomUUID().toString())
                         .header(USER_ROLE_HEADER, "HR"))
                 .andExpect(status().isUnauthorized());
@@ -46,7 +46,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("rejects an unauthenticated request to a protected write endpoint")
     void shouldRejectAnonymousWrite() throws Exception {
-        mockMvc.perform(post("/api/employees/departments")
+        mockMvc.perform(post("/api/v1/employees/departments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isUnauthorized());
@@ -63,7 +63,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("allows CORS preflight requests anonymously")
     void shouldAllowOptionsRequests() throws Exception {
-        mockMvc.perform(options("/api/employees")
+        mockMvc.perform(options("/api/v1/employees")
                         .header("Origin", "http://localhost:5173")
                         .header("Access-Control-Request-Method", "GET"))
                 .andExpect(status().isOk());
@@ -76,14 +76,14 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
                 persistPosition("Developer"), persistGrade("Lead", 4)
         );
 
-        mockMvc.perform(get("/internal/employees/{id}/account-info", employee.getId()))
+        mockMvc.perform(get("/internal/v1/employees/{id}/account-info", employee.getId()))
                 .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(get("/internal/employees/{id}/account-info", employee.getId())
+        mockMvc.perform(get("/internal/v1/employees/{id}/account-info", employee.getId())
                         .header(INTERNAL_KEY_HEADER, "wrong-key"))
                 .andExpect(status().isUnauthorized());
 
-        mockMvc.perform(asHr(get("/internal/employees/{id}/account-info", employee.getId())))
+        mockMvc.perform(asHr(get("/internal/v1/employees/{id}/account-info", employee.getId())))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -94,7 +94,7 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
                 persistPosition("Developer"), persistGrade("Lead", 4)
         );
 
-        mockMvc.perform(asInternal(get("/internal/employees/{id}/account-info", employee.getId())))
+        mockMvc.perform(asInternal(get("/internal/v1/employees/{id}/account-info", employee.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.employeeId").value(employee.getId().toString()))
                 .andExpect(jsonPath("$.email").value(employee.getEmail()))
@@ -105,14 +105,14 @@ class SecurityIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("returns 404 for an unknown employee through the internal API")
     void shouldReturnNotFoundForInternalApi() throws Exception {
-        mockMvc.perform(asInternal(get("/internal/employees/{id}/account-info", UUID.randomUUID())))
+        mockMvc.perform(asInternal(get("/internal/v1/employees/{id}/account-info", UUID.randomUUID())))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     @DisplayName("does not accept the internal key on the public API")
     void shouldNotAuthenticatePublicApiWithInternalKey() throws Exception {
-        mockMvc.perform(get("/api/employees/" + UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/employees/" + UUID.randomUUID())
                         .header(INTERNAL_KEY_HEADER, INTERNAL_API_KEY))
                 .andExpect(status().isUnauthorized());
     }

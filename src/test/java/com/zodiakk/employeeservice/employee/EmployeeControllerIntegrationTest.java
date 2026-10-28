@@ -31,10 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Employee controller")
 class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
 
-    private static final String BASE_URL = "/api/employees";
+    private static final String BASE_URL = "/api/v1/employees";
 
     @Nested
-    @DisplayName("POST /api/employees")
+    @DisplayName("POST /api/v1/employees")
     class Create {
 
         @Test
@@ -230,7 +230,7 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Nested
-    @DisplayName("GET /api/employees")
+    @DisplayName("GET /api/v1/employees")
     class Read {
 
         @Test
@@ -360,7 +360,7 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Nested
-    @DisplayName("PUT /api/employees/{id}")
+    @DisplayName("PUT /api/v1/employees/{id}")
     class Update {
 
         @Test
@@ -490,7 +490,7 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Nested
-    @DisplayName("PATCH /api/employees/{id}/status")
+    @DisplayName("PATCH /api/v1/employees/{id}/status")
     class ChangeStatus {
 
         @Test
@@ -563,7 +563,7 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Nested
-    @DisplayName("DELETE /api/employees/{id}")
+    @DisplayName("DELETE /api/v1/employees/{id}")
     class Delete {
 
         @Test

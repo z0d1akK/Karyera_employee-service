@@ -1,5 +1,6 @@
 package com.zodiakk.employeeservice.config;
 
+import com.zodiakk.employeeservice.config.minio.MinioProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -27,8 +28,10 @@ public class RedisConfig {
 
     private static final Duration DICTIONARY_TTL = Duration.ofMinutes(60);
 
+    private static final Duration PRESIGNED_URL_SAFETY_MARGIN = Duration.ofMinutes(2);
+
     @Bean
-    public CacheManager cacheManager(RedisConnectionFactory connectionFactory) {
+    public CacheManager cacheManager(RedisConnectionFactory connectionFactory, MinioProperties minioProperties) {
 
         PolymorphicTypeValidator typeValidator =
                 BasicPolymorphicTypeValidator.builder()
@@ -52,6 +55,7 @@ public class RedisConfig {
                         .prefixCacheNameWith(CACHE_PREFIX);
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = Map.of(
+                EMPLOYEES, createEmployeeConfiguration(serializationPair, minioProperties),
                 POSITIONS, createDictionaryConfiguration(serializationPair),
                 GRADES, createDictionaryConfiguration(serializationPair),
                 DEPARTMENTS, createDictionaryConfiguration(serializationPair),
@@ -72,5 +76,22 @@ public class RedisConfig {
                 .disableCachingNullValues()
                 .serializeValuesWith(serializationPair)
                 .prefixCacheNameWith(CACHE_PREFIX);
+    }
+
+    private RedisCacheConfiguration createEmployeeConfiguration(
+            RedisSerializationContext.SerializationPair<Object> serializationPair,
+            MinioProperties minioProperties) {
+        return RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(employeeCacheTtl(minioProperties))
+                .disableCachingNullValues()
+                .serializeValuesWith(serializationPair)
+                .prefixCacheNameWith(CACHE_PREFIX);
+    }
+
+    private Duration employeeCacheTtl(MinioProperties minioProperties) {
+        long ttlSeconds = minioProperties.getPresignTtlSeconds()
+                - PRESIGNED_URL_SAFETY_MARGIN.toSeconds();
+
+        return Duration.ofSeconds(Math.max(60L, ttlSeconds));
     }
 }

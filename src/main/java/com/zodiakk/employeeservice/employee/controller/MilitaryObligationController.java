@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/{employeeId}/military-obligation")
+@RequestMapping("/api/v1/employees/{employeeId}/military-obligation")
 @RequiredArgsConstructor
 @Tag(name = "Military Obligation", description = "Operations for managing employee military obligation")
 public class MilitaryObligationController {

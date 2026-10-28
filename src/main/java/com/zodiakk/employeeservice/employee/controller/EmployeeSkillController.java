@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/{employeeId}/skills")
+@RequestMapping("/api/v1/employees/{employeeId}/skills")
 @RequiredArgsConstructor
 @Tag(name = "Employee Skills", description = "Operations for managing employee skills")
 public class EmployeeSkillController {
@@ -64,13 +64,13 @@ public class EmployeeSkillController {
         return ResponseEntity.ok(employeeSkillService.update(employeeId, employeeSkillId, request));
     }
 
-    @DeleteMapping("/{skillId}")
+    @DeleteMapping("/{employeeSkillId}")
     @Operation(summary = "Remove skill from employee", description = "Removes a skill assignment from an employee")
     @ApiResponse(responseCode = "204", description = "Skill successfully removed")
     @ApiResponse(responseCode = "404", description = "Employee or skill assignment not found",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
-    public ResponseEntity<Void> remove(@PathVariable UUID employeeId, @PathVariable UUID skillId) {
-        employeeSkillService.remove(employeeId, skillId);
+    public ResponseEntity<Void> remove(@PathVariable UUID employeeId, @PathVariable UUID employeeSkillId) {
+        employeeSkillService.remove(employeeId, employeeSkillId);
         return ResponseEntity.noContent().build();
     }
 }

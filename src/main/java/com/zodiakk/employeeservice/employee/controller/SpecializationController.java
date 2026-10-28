@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/specializations")
+@RequestMapping("/api/v1/employees/specializations")
 @RequiredArgsConstructor
 @Tag(name = "Specializations", description = "Operations for managing employee specializations")
 public class SpecializationController {

@@ -8,6 +8,9 @@ import com.zodiakk.employeeservice.common.util.EmailUtils;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.filter.EmployeeFilterDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeUpdateRequestDto;
+import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupItemDto;
+import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupResponseDto;
+import com.zodiakk.employeeservice.employee.dto.response.EmployeeProfilePhotoResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeRegistrationInfoDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSummaryResponseDto;
@@ -43,6 +46,7 @@ import com.zodiakk.employeeservice.employee.service.EmployeeService;
 import com.zodiakk.employeeservice.security.access.EmployeeAccessService;
 import com.zodiakk.employeeservice.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -54,6 +58,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
 
@@ -61,6 +66,7 @@ import static com.zodiakk.employeeservice.common.cache.CacheNames.EMPLOYEES;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @Transactional(readOnly = true)
 public class EmployeeServiceImpl implements EmployeeService {
 
@@ -149,6 +155,31 @@ public class EmployeeServiceImpl implements EmployeeService {
                 employee.getEmploymentStatus(),
                 employee.getUserId()
         );
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('INTERNAL_SERVICE', 'HR', 'ADMIN')")
+    public EmployeeLookupResponseDto lookup(List<UUID> employeeIds) {
+        if (employeeIds == null || employeeIds.isEmpty()) {
+            return new EmployeeLookupResponseDto(List.of());
+        }
+
+        List<Employee> employees = employeeRepository.findAllById(new LinkedHashSet<>(employeeIds));
+
+        return new EmployeeLookupResponseDto(
+                employees.stream()
+                        .map(this::toLookupItem)
+                        .toList()
+        );
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('INTERNAL_SERVICE', 'HR', 'ADMIN')")
+    public EmployeeLookupItemDto getLookupByUserId(UUID userId) {
+        Employee employee = employeeRepository.findByUserId(userId)
+                .orElseThrow(() -> EmployeeNotFoundException.byUserId(userId));
+
+        return toLookupItem(employee);
     }
 
     @Override
@@ -253,6 +284,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private EmployeeResponseDto toFullResponse(Employee employee) {
         EmployeeResponseDto response = employeeMapper.toResponseDto(employee);
+        applyProfilePhotoUrl(response.getProfilePhoto());
         List<EmployeeResponsibility> responsibilities =
                 employeeResponsibilityRepository.findAllByEmployeeId(employee.getId());
         response.setResponsibilities(
@@ -261,6 +293,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                         .toList()
         );
         return response;
+    }
+
+    private void applyProfilePhotoUrl(EmployeeProfilePhotoResponseDto profilePhoto) {
+        if (profilePhoto == null || profilePhoto.getObjectKey() == null) {
+            return;
+        }
+
+        try {
+            profilePhoto.setUrl(objectStorageService.createPresignedGetUrl(profilePhoto.getObjectKey()));
+        } catch (RuntimeException ex) {
+            log.warn("Could not create presigned URL for profile photo of employee {}",
+                    profilePhoto.getEmployeeId(), ex);
+        }
     }
 
     private void closeActiveResponsibilities(UUID employeeId) {
@@ -350,5 +395,37 @@ public class EmployeeServiceImpl implements EmployeeService {
     private Employee findById(UUID id) {
         return employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
+    }
+
+    private EmployeeLookupItemDto toLookupItem(Employee employee) {
+        return new EmployeeLookupItemDto(
+                employee.getId(),
+                buildFullName(employee),
+                employee.getEmploymentStatus() == EmploymentStatus.ACTIVE,
+                employee.getPosition() != null ? employee.getPosition().getId() : null,
+                employee.getGrade() != null ? employee.getGrade().getId() : null
+        );
+    }
+
+    private String buildFullName(Employee employee) {
+        StringBuilder fullName = new StringBuilder();
+
+        appendPart(fullName, employee.getLastName());
+        appendPart(fullName, employee.getFirstName());
+        appendPart(fullName, employee.getMiddleName());
+
+        return fullName.toString();
+    }
+
+    private void appendPart(StringBuilder builder, String part) {
+        if (part == null || part.isBlank()) {
+            return;
+        }
+
+        if (!builder.isEmpty()) {
+            builder.append(' ');
+        }
+
+        builder.append(part.trim());
     }
 }

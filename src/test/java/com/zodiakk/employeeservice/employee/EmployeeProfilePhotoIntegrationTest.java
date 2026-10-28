@@ -215,10 +215,10 @@ class EmployeeProfilePhotoIntegrationTest extends AbstractIntegrationTest {
     }
 
     private String url(Employee employee) {
-        return "/api/employees/" + employee.getId() + "/profile-photo";
+        return "/api/v1/employees/" + employee.getId() + "/profile-photo";
     }
 
     private String url(UUID employeeId) {
-        return "/api/employees/" + employeeId + "/profile-photo";
+        return "/api/v1/employees/" + employeeId + "/profile-photo";
     }
 }

@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/responsibility-types")
+@RequestMapping("/api/v1/employees/responsibility-types")
 @RequiredArgsConstructor
 @Tag(name = "Responsibility Types", description = "Operations for managing employee responsibility types")
 public class ResponsibilityTypeController {

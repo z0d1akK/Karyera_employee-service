@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/departments")
+@RequestMapping("/api/v1/employees/departments")
 @RequiredArgsConstructor
 @Tag(name = "Departments", description = "Operations for managing employee departments")
 public class DepartmentController {

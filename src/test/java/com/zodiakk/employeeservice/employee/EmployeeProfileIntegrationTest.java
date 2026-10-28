@@ -42,7 +42,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("supports the full education lifecycle")
         void shouldManageEducation() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/education";
+            String url = "/api/v1/employees/" + employee.getId() + "/education";
 
             UUID educationId = idOf(mockMvc.perform(asHr(post(url))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("lets an employee manage his own education")
         void shouldLetEmployeeManageOwnEducation() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/education";
+            String url = "/api/v1/employees/" + employee.getId() + "/education";
 
             mockMvc.perform(asEmployee(post(url), employee.getUserId())
                             .contentType(MediaType.APPLICATION_JSON)
@@ -103,7 +103,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         void shouldRejectInvalidEducationRequests() throws Exception {
             Employee employee = newEmployee();
             Employee other = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/education";
+            String url = "/api/v1/employees/" + employee.getId() + "/education";
 
             mockMvc.perform(asHr(post(url))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +120,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                             .content("{\"institutionName\":\"BSUIR\"}"))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(asHr(post("/api/employees/" + UUID.randomUUID() + "/education"))
+            mockMvc.perform(asHr(post("/api/v1/employees/" + UUID.randomUUID() + "/education"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(EducationCreateRequestDto.builder()
                                     .educationLevel(EducationLevel.BACHELOR)
@@ -136,9 +136,9 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                             .build())))
                     .andExpect(status().isCreated()));
 
-            mockMvc.perform(asHr(get("/api/employees/" + other.getId() + "/education/" + educationId)))
+            mockMvc.perform(asHr(get("/api/v1/employees/" + other.getId() + "/education/" + educationId)))
                     .andExpect(status().isBadRequest());
-            mockMvc.perform(asHr(delete("/api/employees/" + other.getId() + "/education/" + educationId)))
+            mockMvc.perform(asHr(delete("/api/v1/employees/" + other.getId() + "/education/" + educationId)))
                     .andExpect(status().isBadRequest());
             mockMvc.perform(asHr(get(url + "/" + UUID.randomUUID())))
                     .andExpect(status().isNotFound());
@@ -149,7 +149,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         void shouldForbidForeignEducationAccess() throws Exception {
             Employee employee = newEmployee();
 
-            mockMvc.perform(asEmployee(post("/api/employees/" + employee.getId() + "/education"),
+            mockMvc.perform(asEmployee(post("/api/v1/employees/" + employee.getId() + "/education"),
                             UUID.randomUUID())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(EducationCreateRequestDto.builder()
@@ -168,7 +168,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("supports the full experience lifecycle")
         void shouldManageExperience() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/experience";
+            String url = "/api/v1/employees/" + employee.getId() + "/experience";
 
             UUID experienceId = idOf(mockMvc.perform(asHr(post(url))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -211,7 +211,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("rejects invalid experience requests")
         void shouldRejectInvalidExperienceRequests() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/experience";
+            String url = "/api/v1/employees/" + employee.getId() + "/experience";
 
             mockMvc.perform(asHr(post(url))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -232,7 +232,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                                     .build())))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(asHr(get("/api/employees/" + UUID.randomUUID() + "/experience")))
+            mockMvc.perform(asHr(get("/api/v1/employees/" + UUID.randomUUID() + "/experience")))
                     .andExpect(status().isNotFound());
 
             mockMvc.perform(asHr(get(url + "/" + UUID.randomUUID())))
@@ -249,7 +249,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         void shouldManageEmployeeSkills() throws Exception {
             Employee employee = newEmployee();
             Skill skill = persistSkill("Java");
-            String url = "/api/employees/" + employee.getId() + "/skills";
+            String url = "/api/v1/employees/" + employee.getId() + "/skills";
 
             UUID employeeSkillId = idOf(mockMvc.perform(asHr(post(url))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -291,7 +291,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
             Employee other = newEmployee();
             Skill skill = persistSkill("Java");
             Skill inactiveSkill = persistSkill("COBOL", false);
-            String url = "/api/employees/" + employee.getId() + "/skills";
+            String url = "/api/v1/employees/" + employee.getId() + "/skills";
 
             UUID employeeSkillId = idOf(mockMvc.perform(asHr(post(url))
                     .contentType(MediaType.APPLICATION_JSON)
@@ -325,7 +325,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                                     .build())))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(asHr(post("/api/employees/" + UUID.randomUUID() + "/skills"))
+            mockMvc.perform(asHr(post("/api/v1/employees/" + UUID.randomUUID() + "/skills"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(EmployeeSkillCreateRequestDto.builder()
                                     .skillId(skill.getId())
@@ -341,19 +341,19 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                                     .build())))
                     .andExpect(status().isNotFound());
 
-            mockMvc.perform(asHr(put("/api/employees/" + other.getId() + "/skills/" + employeeSkillId))
+            mockMvc.perform(asHr(put("/api/v1/employees/" + other.getId() + "/skills/" + employeeSkillId))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(EmployeeSkillUpdateRequestDto.builder().level(4).build())))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(asHr(delete("/api/employees/" + other.getId() + "/skills/" + employeeSkillId)))
+            mockMvc.perform(asHr(delete("/api/v1/employees/" + other.getId() + "/skills/" + employeeSkillId)))
                     .andExpect(status().isBadRequest());
         }
 
         @Test
         @DisplayName("returns 404 for an unknown employee when listing skills")
         void shouldReturnNotFoundForUnknownEmployee() throws Exception {
-            mockMvc.perform(asHr(get("/api/employees/" + UUID.randomUUID() + "/skills")))
+            mockMvc.perform(asHr(get("/api/v1/employees/" + UUID.randomUUID() + "/skills")))
                     .andExpect(status().isNotFound());
         }
     }
@@ -366,7 +366,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("supports the full military obligation lifecycle")
         void shouldManageMilitaryObligation() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/military-obligation";
+            String url = "/api/v1/employees/" + employee.getId() + "/military-obligation";
 
             mockMvc.perform(asHr(post(url))
                             .contentType(MediaType.APPLICATION_JSON)
@@ -413,7 +413,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         void shouldCreateOnUpsert() throws Exception {
             Employee employee = newEmployee();
 
-            mockMvc.perform(asHr(put("/api/employees/" + employee.getId() + "/military-obligation"))
+            mockMvc.perform(asHr(put("/api/v1/employees/" + employee.getId() + "/military-obligation"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(MilitaryObligationCreateRequestDto.builder()
                                     .status(MilitaryStatus.DEFERRED)
@@ -426,7 +426,7 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
         @DisplayName("rejects a duplicate obligation and invalid requests")
         void shouldRejectInvalidMilitaryObligationRequests() throws Exception {
             Employee employee = newEmployee();
-            String url = "/api/employees/" + employee.getId() + "/military-obligation";
+            String url = "/api/v1/employees/" + employee.getId() + "/military-obligation";
             MilitaryObligationCreateRequestDto request = MilitaryObligationCreateRequestDto.builder()
                     .status(MilitaryStatus.LIABLE)
                     .build();
@@ -446,10 +446,10 @@ class EmployeeProfileIntegrationTest extends AbstractIntegrationTest {
                             .content("{}"))
                     .andExpect(status().isBadRequest());
 
-            mockMvc.perform(asHr(get("/api/employees/" + UUID.randomUUID() + "/military-obligation")))
+            mockMvc.perform(asHr(get("/api/v1/employees/" + UUID.randomUUID() + "/military-obligation")))
                     .andExpect(status().isNotFound());
 
-            mockMvc.perform(asHr(delete("/api/employees/" + UUID.randomUUID() + "/military-obligation")))
+            mockMvc.perform(asHr(delete("/api/v1/employees/" + UUID.randomUUID() + "/military-obligation")))
                     .andExpect(status().isNotFound());
 
             mockMvc.perform(asHr(patch(url))

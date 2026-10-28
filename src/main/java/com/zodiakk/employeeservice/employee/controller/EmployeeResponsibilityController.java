@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees")
+@RequestMapping("/api/v1/employees")
 @RequiredArgsConstructor
 @Tag(name = "Employee Responsibilities", description = "Operations for managing employee responsibilities")
 public class EmployeeResponsibilityController {

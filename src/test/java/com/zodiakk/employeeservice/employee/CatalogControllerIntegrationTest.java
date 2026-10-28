@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @DisplayName("Catalog controllers")
 class CatalogControllerIntegrationTest extends AbstractIntegrationTest {
 
-    private static final String BASE_URL = "/api/employees";
+    private static final String BASE_URL = "/api/v1/employees";
 
     @Nested
     @DisplayName("Departments")

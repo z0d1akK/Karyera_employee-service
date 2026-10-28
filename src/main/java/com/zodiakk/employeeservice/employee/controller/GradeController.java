@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/grades")
+@RequestMapping("/api/v1/employees/grades")
 @RequiredArgsConstructor
 @Tag(name = "Grades", description = "Operations for managing employee grades")
 public class GradeController {

@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/{employeeId}/profile-photo")
+@RequestMapping("/api/v1/employees/{employeeId}/profile-photo")
 @RequiredArgsConstructor
 @Tag(name = "Employee Profile Photo", description = "Operations for managing employee profile photos")
 public class EmployeeProfilePhotoController {

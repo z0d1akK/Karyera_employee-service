@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/positions")
+@RequestMapping("/api/v1/employees/positions")
 @RequiredArgsConstructor
 @Tag(name = "Positions", description = "Operations for managing employee positions")
 public class PositionController {

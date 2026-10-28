@@ -8,18 +8,24 @@ import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 
 @Service
-@RequiredArgsConstructor
 public class MinioObjectStorageService implements ObjectStorageService {
 
     private final MinioClient minioClient;
 
+    private final MinioClient presignClient;
+
     private final MinioProperties minioProperties;
+
+    public MinioObjectStorageService(MinioClient minioClient, MinioProperties minioProperties) {
+        this.minioClient = minioClient;
+        this.minioProperties = minioProperties;
+        this.presignClient = buildPresignClient(minioClient, minioProperties);
+    }
 
     @Override
     public void upload(String objectKey, InputStream inputStream, String contentType, long contentLength) {
@@ -54,7 +60,7 @@ public class MinioObjectStorageService implements ObjectStorageService {
     @Override
     public String createPresignedGetUrl(String objectKey) {
         try {
-            return minioClient.getPresignedObjectUrl(
+            return presignClient.getPresignedObjectUrl(
                     GetPresignedObjectUrlArgs.builder()
                             .method(Method.GET)
                             .bucket(minioProperties.getBucket())
@@ -65,5 +71,20 @@ public class MinioObjectStorageService implements ObjectStorageService {
         } catch (Exception e) {
             throw new ObjectStorageUploadFailedException(e);
         }
+    }
+
+    private MinioClient buildPresignClient(MinioClient defaultClient, MinioProperties properties) {
+        String publicEndpoint = properties.getPublicEndpoint();
+
+        if (publicEndpoint == null
+                || publicEndpoint.isBlank()
+                || publicEndpoint.equals(properties.getEndpoint())) {
+            return defaultClient;
+        }
+
+        return MinioClient.builder()
+                .endpoint(publicEndpoint)
+                .credentials(properties.getAccessKey(), properties.getSecretKey())
+                .build();
     }
 }

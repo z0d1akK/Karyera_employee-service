@@ -51,7 +51,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.length()").value(1))
                     .andExpect(jsonPath("$[0].id").value(responsibilityId.toString()));
 
-            mockMvc.perform(asHr(get("/api/employees/responsibilities/responsible/" + manager.getId())))
+            mockMvc.perform(asHr(get("/api/v1/employees/responsibilities/responsible/" + manager.getId())))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.length()").value(1));
         }
@@ -195,7 +195,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
             Employee manager = newEmployee(EmploymentStatus.ACTIVE);
             ResponsibilityType type = persistResponsibilityType("MENTOR", true, true);
 
-            mockMvc.perform(asHr(post("/api/employees/" + UUID.randomUUID() + "/responsibilities"))
+            mockMvc.perform(asHr(post("/api/v1/employees/" + UUID.randomUUID() + "/responsibilities"))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(request(manager, type, LocalDate.now(), null))))
                     .andExpect(status().isNotFound());
@@ -242,7 +242,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
                     .content(toJson(request(manager, type, LocalDate.now().minusDays(10), null))))
                     .andExpect(status().isCreated()));
 
-            mockMvc.perform(asHr(put("/api/employees/responsibilities/" + responsibilityId))
+            mockMvc.perform(asHr(put("/api/v1/employees/responsibilities/" + responsibilityId))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(toJson(EmployeeResponsibilityUpdateRequestDto.builder()
                                     .responsibleEmployeeId(newManager.getId())
@@ -253,12 +253,12 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
                     .andExpect(jsonPath("$.responsibilityType.code").value("SUPERVISOR"));
 
             LocalDate endDate = LocalDate.now();
-            mockMvc.perform(asHr(patch("/api/employees/responsibilities/" + responsibilityId + "/close")
+            mockMvc.perform(asHr(patch("/api/v1/employees/responsibilities/" + responsibilityId + "/close")
                             .param("endDate", endDate.toString())))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.endDate").value(endDate.toString()));
 
-            mockMvc.perform(asHr(delete("/api/employees/responsibilities/" + responsibilityId)))
+            mockMvc.perform(asHr(delete("/api/v1/employees/responsibilities/" + responsibilityId)))
                     .andExpect(status().isNoContent());
 
             assertThat(employeeResponsibilityRepository.findById(responsibilityId)).isEmpty();
@@ -276,7 +276,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
                     .content(toJson(request(manager, type, LocalDate.now(), null))))
                     .andExpect(status().isCreated()));
 
-            mockMvc.perform(asHr(patch("/api/employees/responsibilities/" + responsibilityId + "/close")
+            mockMvc.perform(asHr(patch("/api/v1/employees/responsibilities/" + responsibilityId + "/close")
                             .param("endDate", LocalDate.now().minusDays(1).toString())))
                     .andExpect(status().isBadRequest());
         }
@@ -286,13 +286,13 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
         void shouldReturnNotFound() throws Exception {
             UUID id = UUID.randomUUID();
 
-            mockMvc.perform(asHr(delete("/api/employees/responsibilities/" + id)))
+            mockMvc.perform(asHr(delete("/api/v1/employees/responsibilities/" + id)))
                     .andExpect(status().isNotFound());
-            mockMvc.perform(asHr(put("/api/employees/responsibilities/" + id))
+            mockMvc.perform(asHr(put("/api/v1/employees/responsibilities/" + id))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
                     .andExpect(status().isNotFound());
-            mockMvc.perform(asHr(patch("/api/employees/responsibilities/" + id + "/close")
+            mockMvc.perform(asHr(patch("/api/v1/employees/responsibilities/" + id + "/close")
                             .param("endDate", LocalDate.now().toString())))
                     .andExpect(status().isNotFound());
         }
@@ -300,7 +300,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
         @Test
         @DisplayName("returns 404 when listing responsibilities of an unknown employee")
         void shouldReturnNotFoundForUnknownEmployee() throws Exception {
-            mockMvc.perform(asHr(get("/api/employees/" + UUID.randomUUID() + "/responsibilities")))
+            mockMvc.perform(asHr(get("/api/v1/employees/" + UUID.randomUUID() + "/responsibilities")))
                     .andExpect(status().isNotFound());
         }
     }
@@ -315,7 +315,7 @@ class EmployeeResponsibilityIntegrationTest extends AbstractIntegrationTest {
     }
 
     private String base(Employee employee) {
-        return "/api/employees/" + employee.getId() + "/responsibilities";
+        return "/api/v1/employees/" + employee.getId() + "/responsibilities";
     }
 
     private EmployeeResponsibilityCreateRequestDto request(

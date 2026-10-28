@@ -31,7 +31,7 @@ class CacheIntegrationTest extends AbstractIntegrationTest {
     void shouldCacheCatalogEntries() throws Exception {
         Department department = persistDepartment("Backend");
 
-        mockMvc.perform(asHr(get("/api/employees/departments/" + department.getId())))
+        mockMvc.perform(asHr(get("/api/v1/employees/departments/" + department.getId())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Backend"));
 
@@ -42,7 +42,7 @@ class CacheIntegrationTest extends AbstractIntegrationTest {
         Set<String> keys = stringRedisTemplate.keys("employee-service:*");
         assertThat(keys).isNotNull().anyMatch(key -> key.contains("departments"));
 
-        mockMvc.perform(asAdmin(put("/api/employees/departments/" + department.getId()))
+        mockMvc.perform(asAdmin(put("/api/v1/employees/departments/" + department.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(DepartmentUpdateRequestDto.builder()
                                 .name("Platform")
@@ -58,9 +58,9 @@ class CacheIntegrationTest extends AbstractIntegrationTest {
     void shouldCacheEmployeeProfiles() throws Exception {
         Employee employee = persistEmployee(persistPosition("Developer"), persistGrade("Lead", 4));
 
-        mockMvc.perform(asHr(get("/api/employees/" + employee.getId())))
+        mockMvc.perform(asHr(get("/api/v1/employees/" + employee.getId())))
                 .andExpect(status().isOk());
-        mockMvc.perform(asHr(get("/api/employees/user/" + employee.getUserId())))
+        mockMvc.perform(asHr(get("/api/v1/employees/user/" + employee.getUserId())))
                 .andExpect(status().isOk());
 
         Cache cache = cacheManager.getCache(CacheNames.EMPLOYEES);
@@ -68,7 +68,7 @@ class CacheIntegrationTest extends AbstractIntegrationTest {
         assertThat(cache.get("id:" + employee.getId())).isNotNull();
         assertThat(cache.get("user:" + employee.getUserId())).isNotNull();
 
-        mockMvc.perform(asHr(put("/api/employees/" + employee.getId()))
+        mockMvc.perform(asHr(put("/api/v1/employees/" + employee.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(toJson(EmployeeUpdateRequestDto.builder()
                                 .firstName("Sergey")

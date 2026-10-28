@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/{employeeId}/experience")
+@RequestMapping("/api/v1/employees/{employeeId}/experience")
 @RequiredArgsConstructor
 @Tag(name = "Employee Experience", description = "Operations for managing employee experience")
 public class ExperienceController {

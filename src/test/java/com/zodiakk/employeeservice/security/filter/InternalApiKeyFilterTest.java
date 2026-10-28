@@ -39,7 +39,7 @@ class InternalApiKeyFilterTest {
 
     private static final String VALID_KEY = "test-internal-api-key";
 
-    private static final String INTERNAL_URI = "/internal/employees";
+    private static final String INTERNAL_URI = "/internal/v1/employees";
 
     @Mock
     private AuthenticationEntryPoint authenticationEntryPoint;
@@ -240,7 +240,7 @@ class InternalApiKeyFilterTest {
         @Test
         @DisplayName("passes through a non-internal path without authenticating")
         void shouldPassThroughNonInternalPath() throws Exception {
-            MockHttpServletRequest apiRequest = new MockHttpServletRequest("GET", "/api/employees");
+            MockHttpServletRequest apiRequest = new MockHttpServletRequest("GET", "/api/v1/employees");
             apiRequest.addHeader(Headers.INTERNAL_KEY, VALID_KEY);
 
             filter.doFilter(apiRequest, response, filterChain);

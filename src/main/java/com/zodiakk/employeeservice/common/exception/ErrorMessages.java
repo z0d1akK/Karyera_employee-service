@@ -91,6 +91,8 @@ public class ErrorMessages {
 
     public static final String FILE_TOO_LARGE = "Размер файла превышает максимально допустимый размер %s байт";
 
+    public static final String UPLOAD_SIZE_EXCEEDED = "Размер загружаемого файла превышает допустимый";
+
     public static final String OBJECT_STORAGE_UPLOAD_FAILED = "Не удалось загрузить файл в объектное хранилище";
 
     public static final String OBJECT_STORAGE_DELETE_FAILED = "Не удалось удалить файл из объектного хранилища";
@@ -110,6 +112,12 @@ public class ErrorMessages {
     public static final String DATA_INTEGRITY_VIOLATION = "Нарушение целостности данных";
 
     public static final String INVALID_REQUEST_BODY = "Некорректное тело запроса";
+
+    public static final String RESOURCE_NOT_FOUND = "Запрошенный ресурс не найден";
+
+    public static final String METHOD_NOT_ALLOWED = "Метод запроса не поддерживается";
+
+    public static final String UNSUPPORTED_MEDIA_TYPE = "Неподдерживаемый тип содержимого запроса";
 
     public static final String INVALID_PARAMETER = "Некорректное значение параметра: %s";
 

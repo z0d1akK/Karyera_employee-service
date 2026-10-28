@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/skills")
+@RequestMapping("/api/v1/employees/skills")
 @RequiredArgsConstructor
 @Tag(name = "Skills", description = "Operations for managing employee skills")
 public class SkillController {

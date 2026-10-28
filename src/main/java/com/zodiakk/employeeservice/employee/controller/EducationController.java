@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/employees/{employeeId}/education")
+@RequestMapping("/api/v1/employees/{employeeId}/education")
 @RequiredArgsConstructor
 @Tag(name = "Employee Education", description = "Operations for managing employee education")
 public class EducationController {
