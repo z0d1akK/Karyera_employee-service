@@ -25,14 +25,23 @@ public class OutboxEventService {
     private final ObjectMapper objectMapper;
 
     @Transactional(propagation = Propagation.MANDATORY)
-    public void saveEvent(UUID aggregateId, String aggregateType, String eventType, int eventVersion, Object payload) {
+    public void saveEvent(
+            String topic,
+            UUID aggregateId,
+            String aggregateType,
+            String eventType,
+            int eventVersion,
+            Object payload
+    ) {
         UUID eventId = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
 
         try {
             OutboxEventEnvelope envelope = new OutboxEventEnvelope(
                     eventId,
+                    aggregateId,
                     eventType,
+                    aggregateType,
                     eventVersion,
                     now,
                     objectMapper.valueToTree(payload)
@@ -44,6 +53,7 @@ public class OutboxEventService {
                     .id(eventId)
                     .aggregateId(aggregateId)
                     .aggregateType(aggregateType)
+                    .topic(topic)
                     .eventType(eventType)
                     .eventVersion(eventVersion)
                     .payload(json)

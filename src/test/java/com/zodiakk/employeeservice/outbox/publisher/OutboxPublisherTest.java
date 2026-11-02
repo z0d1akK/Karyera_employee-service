@@ -96,8 +96,7 @@ class OutboxPublisherTest {
 
         @Test
         @DisplayName("publishes every event in the claimed batch")
-        void shouldPublishEveryClaimedEvent() {
-            OutboxEvent first = event(1);
+        void shouldPublishEveryClaimedEvent() {            OutboxEvent first = event(1);
             OutboxEvent second = event(2);
             CompletableFuture<SendResult<String, String>> acknowledged =
                     CompletableFuture.completedFuture(null);
@@ -112,6 +111,25 @@ class OutboxPublisherTest {
             verify(kafkaTemplate, times(2)).send(TOPIC, AGGREGATE_ID.toString(), PAYLOAD);
             verify(claimService).markPublished(EVENT_ID, 1);
             verify(claimService).markPublished(EVENT_ID, 2);
+        }
+
+        @Test
+        @DisplayName("routes an event with an explicit topic to that topic")
+        void shouldRouteEventWithExplicitTopic() {
+            OutboxEvent event = event(1);
+            event.setTopic("employee.events.v1");
+
+            CompletableFuture<SendResult<String, String>> acknowledged =
+                    CompletableFuture.completedFuture(null);
+
+            when(claimService.claimBatch()).thenReturn(List.of(event));
+            when(kafkaTemplate.send("employee.events.v1", AGGREGATE_ID.toString(), PAYLOAD))
+                    .thenReturn(acknowledged);
+            when(claimService.markPublished(EVENT_ID, 1)).thenReturn(true);
+
+            publisher.publishPendingEvents();
+
+            verify(kafkaTemplate).send("employee.events.v1", AGGREGATE_ID.toString(), PAYLOAD);
         }
     }
 
@@ -234,7 +252,7 @@ class OutboxPublisherTest {
                 sendTimeoutSeconds
         );
         OutboxPublisher result = new OutboxPublisher(claimService, kafkaTemplate, properties);
-        ReflectionTestUtils.setField(result, "userEventsTopic", TOPIC);
+        ReflectionTestUtils.setField(result, "employeeAccountEventsTopic", TOPIC);
         return result;
     }
 

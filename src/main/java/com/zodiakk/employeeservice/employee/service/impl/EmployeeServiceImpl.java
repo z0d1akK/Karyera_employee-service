@@ -43,6 +43,7 @@ import com.zodiakk.employeeservice.employee.repository.SpecializationRepository;
 import com.zodiakk.employeeservice.employee.repository.specification.employee.EmployeePageableFactory;
 import com.zodiakk.employeeservice.employee.repository.specification.employee.EmployeeSpecification;
 import com.zodiakk.employeeservice.employee.service.EmployeeService;
+import com.zodiakk.employeeservice.integration.employee.service.EmployeeEventService;
 import com.zodiakk.employeeservice.security.access.EmployeeAccessService;
 import com.zodiakk.employeeservice.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.UUID;
@@ -90,12 +92,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeAccessService employeeAccessService;
 
+    private final EmployeeEventService employeeEventService;
+
     @Override
     @PreAuthorize("@employeeAccess.canManageEmployeeProfiles()")
     @Transactional
     @CacheEvict(cacheNames = EMPLOYEES, allEntries = true)
     public EmployeeResponseDto create(EmployeeCreateRequestDto request) {
-        if (employeeRepository.existsByUserId(request.getUserId())) {
+        if (request.getUserId() != null && employeeRepository.existsByUserId(request.getUserId())) {
             throw new EmployeeAlreadyExistsException(request.getUserId());
         }
         if (employeeRepository.existsByEmailIgnoreCase(request.getEmail())) {
@@ -214,6 +218,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         EmploymentStatus previousStatus = employee.getEmploymentStatus();
 
+        UUID previousPositionId = employee.getPosition() != null ? employee.getPosition().getId() : null;
+        UUID previousGradeId = employee.getGrade() != null ? employee.getGrade().getId() : null;
+
         employeeMapper.updateEntity(request, employee);
 
         if (request.getPositionId() != null) {
@@ -242,7 +249,23 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setEmail(normalizedEmail);
         }
 
-        return toFullResponse(employeeRepository.save(employee));
+        Employee saved = employeeRepository.save(employee);
+
+        UUID positionId = saved.getPosition() != null ? saved.getPosition().getId() : null;
+        UUID gradeId = saved.getGrade() != null ? saved.getGrade().getId() : null;
+
+        if (!Objects.equals(previousPositionId, positionId)
+                || !Objects.equals(previousGradeId, gradeId)) {
+            employeeEventService.recordPositionChanged(
+                    saved.getId(),
+                    previousPositionId,
+                    previousGradeId,
+                    positionId,
+                    gradeId
+            );
+        }
+
+        return toFullResponse(saved);
     }
 
     @Override

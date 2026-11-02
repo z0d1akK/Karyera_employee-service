@@ -50,3 +50,9 @@ databaseChangeLog:
 
   - include:
       file: db/changelog/tables/017-create-outbox-events.yaml
+
+  - include:
+      file: db/changelog/tables/018-add-outbox-topic.yaml
+
+  - include:
+      file: db/changelog/tables/019-seed-bootstrap-admin.yaml

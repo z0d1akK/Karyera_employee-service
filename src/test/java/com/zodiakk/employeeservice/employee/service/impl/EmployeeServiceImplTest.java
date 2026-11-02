@@ -35,6 +35,7 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeResponsibilityRep
 import com.zodiakk.employeeservice.employee.repository.GradeRepository;
 import com.zodiakk.employeeservice.employee.repository.PositionRepository;
 import com.zodiakk.employeeservice.employee.repository.SpecializationRepository;
+import com.zodiakk.employeeservice.integration.employee.service.EmployeeEventService;
 import com.zodiakk.employeeservice.security.access.EmployeeAccessService;
 import com.zodiakk.employeeservice.security.principal.CurrentUser;
 import org.junit.jupiter.api.AfterEach;
@@ -132,6 +133,9 @@ class EmployeeServiceImplTest {
 
     @Mock
     private EmployeeAccessService employeeAccessService;
+
+    @Mock
+    private EmployeeEventService employeeEventService;
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
@@ -657,6 +661,14 @@ class EmployeeServiceImplTest {
             assertThat(saved.getGrade().getId()).isEqualTo(OTHER_ID);
             assertThat(saved.getDepartment().getId()).isEqualTo(OTHER_ID);
             assertThat(saved.getSpecialization().getId()).isEqualTo(OTHER_ID);
+
+            verify(employeeEventService).recordPositionChanged(
+                    EMPLOYEE_ID,
+                    POSITION_ID,
+                    GRADE_ID,
+                    OTHER_ID,
+                    OTHER_ID
+            );
         }
 
         @Test

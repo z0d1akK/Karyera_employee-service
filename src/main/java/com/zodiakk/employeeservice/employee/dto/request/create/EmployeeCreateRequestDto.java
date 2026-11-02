@@ -20,9 +20,8 @@ import java.util.UUID;
 @Builder
 public class EmployeeCreateRequestDto {
 
-    @Schema(description = "User identifier from Auth Service",
+    @Schema(description = "User identifier from Auth Service. Optional until an account is created.",
             example = "e73dcc73-e1db-4c3a-9246-0e1c2de79074")
-    @NotNull(message = ValidationMessages.USER_ID_REQUIRED)
     private UUID userId;
 
     @Schema(description = "Employee first name", example = "Ivan")

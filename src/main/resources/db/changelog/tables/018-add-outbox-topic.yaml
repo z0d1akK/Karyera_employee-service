@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-add-outbox-topic
+      author: zodiakk
+      changes:
+        - addColumn:
+            tableName: outbox_events
+            columns:
+              - column:
+                  name: topic
+                  type: VARCHAR(255)

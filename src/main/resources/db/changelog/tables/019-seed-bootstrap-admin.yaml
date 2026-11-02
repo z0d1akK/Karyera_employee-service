@@ -1,0 +1,77 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-seed-bootstrap-admin
+      author: zodiakk
+      comment: Bootstrap catalogs and ADMIN employee linked to auth user 9a1b0c2d-3e4f-4a5b-8c7d-000000000001
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM employees WHERE id = '9a1b0c2d-3e4f-4a5b-8c7d-000000000003'
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: true
+            sql: |
+              INSERT INTO departments (id, name, description, active, created_at, updated_at)
+              VALUES (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000010',
+                  'Администрация',
+                  'Служебный отдел для первичного администратора',
+                  TRUE,
+                  NOW(),
+                  NOW()
+              );
+
+              INSERT INTO positions (id, name, description, active, created_at, updated_at)
+              VALUES (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000011',
+                  'Системный администратор',
+                  'Первичная учётная запись администратора Karyera',
+                  TRUE,
+                  NOW(),
+                  NOW()
+              );
+
+              INSERT INTO grades (id, name, level, description, active, created_at, updated_at)
+              VALUES (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000012',
+                  'G1',
+                  1,
+                  'Базовый грейд для служебных записей',
+                  TRUE,
+                  NOW(),
+                  NOW()
+              );
+
+              INSERT INTO employees (
+                  id,
+                  user_id,
+                  first_name,
+                  last_name,
+                  middle_name,
+                  email,
+                  hire_date,
+                  position_id,
+                  grade_id,
+                  department_id,
+                  employment_status,
+                  version,
+                  created_at,
+                  updated_at
+              ) VALUES (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000003',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000001',
+                  'Системный',
+                  'Администратор',
+                  NULL,
+                  'admin@karyera.local',
+                  CURRENT_DATE,
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000011',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000012',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000010',
+                  'ACTIVE',
+                  0,
+                  NOW(),
+                  NOW()
+              );

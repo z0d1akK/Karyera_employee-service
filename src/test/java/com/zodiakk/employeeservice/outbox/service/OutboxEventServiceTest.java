@@ -36,6 +36,8 @@ class OutboxEventServiceTest {
 
     private static final UUID EMPLOYEE_ID = UUID.fromString("55555555-5555-5555-5555-555555555555");
 
+    private static final String TOPIC = "employee.account.events.v1";
+
     private static final String AGGREGATE_TYPE = "EMPLOYEE_ACCOUNT";
 
     private static final String EVENT_TYPE = "EMPLOYEE_ACCOUNT_UNLINKED";
@@ -57,7 +59,7 @@ class OutboxEventServiceTest {
             EmployeeAccountUnlinkedEvent payload =
                     new EmployeeAccountUnlinkedEvent(USER_ID, EMPLOYEE_ID);
 
-            service.saveEvent(AGGREGATE_ID, AGGREGATE_TYPE, EVENT_TYPE, EVENT_VERSION, payload);
+            service.saveEvent(TOPIC, AGGREGATE_ID, AGGREGATE_TYPE, EVENT_TYPE, EVENT_VERSION, payload);
 
             ArgumentCaptor<OutboxEvent> captor = ArgumentCaptor.forClass(OutboxEvent.class);
             verify(outboxEventRepository).save(captor.capture());
@@ -65,6 +67,7 @@ class OutboxEventServiceTest {
             OutboxEvent saved = captor.getValue();
 
             assertThat(saved.getId()).isNotNull();
+            assertThat(saved.getTopic()).isEqualTo(TOPIC);
             assertThat(saved.getAggregateId()).isEqualTo(AGGREGATE_ID);
             assertThat(saved.getAggregateType()).isEqualTo(AGGREGATE_TYPE);
             assertThat(saved.getEventType()).isEqualTo(EVENT_TYPE);
@@ -79,6 +82,8 @@ class OutboxEventServiceTest {
             JsonNode envelope = objectMapper.readTree(saved.getPayload());
 
             assertThat(envelope.get("eventId").asString()).isEqualTo(saved.getId().toString());
+            assertThat(envelope.get("aggregateId").asString()).isEqualTo(AGGREGATE_ID.toString());
+            assertThat(envelope.get("aggregateType").asString()).isEqualTo(AGGREGATE_TYPE);
             assertThat(envelope.get("eventType").asString()).isEqualTo(EVENT_TYPE);
             assertThat(envelope.get("eventVersion").asInt()).isEqualTo(EVENT_VERSION);
             assertThat(envelope.get("occurredAt").asString()).isNotBlank();
@@ -98,6 +103,7 @@ class OutboxEventServiceTest {
             OutboxEventService service = new OutboxEventService(outboxEventRepository, objectMapper);
 
             assertThatThrownBy(() -> service.saveEvent(
+                    TOPIC,
                     AGGREGATE_ID,
                     AGGREGATE_TYPE,
                     EVENT_TYPE,
@@ -121,6 +127,7 @@ class OutboxEventServiceTest {
             OutboxEventService service = new OutboxEventService(outboxEventRepository, objectMapper);
 
             assertThatThrownBy(() -> service.saveEvent(
+                    TOPIC,
                     AGGREGATE_ID,
                     AGGREGATE_TYPE,
                     EVENT_TYPE,

@@ -40,6 +40,9 @@ public class EmployeeSummaryResponseDto {
     @Schema(description = "Employee grade")
     private GradeResponseDto grade;
 
+    @Schema(description = "Employee department")
+    private DepartmentResponseDto department;
+
     @Schema(description = "Employee employment status")
     private EmploymentStatus employmentStatus;
 

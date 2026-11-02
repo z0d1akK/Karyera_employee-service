@@ -76,6 +76,7 @@ public class EmployeeAccessService {
 
     public boolean canListEmployees() {
         return SecurityUtils.hasAnyRole(
+                SecurityConstants.EMPLOYEE_AUTHORITY,
                 SecurityConstants.MANAGER_AUTHORITY,
                 SecurityConstants.HR_AUTHORITY,
                 SecurityConstants.ADMIN_AUTHORITY

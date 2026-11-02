@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.UUID;
 
@@ -20,6 +21,8 @@ import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class EmployeeAccountEventServiceTest {
+
+    private static final String TOPIC = "employee.account.events.v1";
 
     private static final UUID USER_ID = UUID.fromString("12121212-3434-5656-7878-909090909090");
 
@@ -33,6 +36,7 @@ class EmployeeAccountEventServiceTest {
     @BeforeEach
     void setUp() {
         service = new EmployeeAccountEventService(outboxEventService);
+        ReflectionTestUtils.setField(service, "employeeAccountEventsTopic", TOPIC);
     }
 
     @Nested
@@ -47,6 +51,7 @@ class EmployeeAccountEventServiceTest {
             ArgumentCaptor<Object> payloadCaptor = ArgumentCaptor.forClass(Object.class);
 
             verify(outboxEventService).saveEvent(
+                    eq(TOPIC),
                     eq(EMPLOYEE_ID),
                     eq(KafkaEventConstants.AGGREGATE_TYPE_EMPLOYEE_ACCOUNT),
                     eq(KafkaEventConstants.EMPLOYEE_ACCOUNT_UNLINKED),

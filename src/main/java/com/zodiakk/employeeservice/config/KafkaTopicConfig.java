@@ -16,6 +16,9 @@ public class KafkaTopicConfig {
     @Value("${app.kafka.topics.employee-account-events}")
     private String employeeAccountEventsTopic;
 
+    @Value("${app.kafka.topics.employee-events}")
+    private String employeeEventsTopic;
+
     @Bean
     public NewTopic userEventsTopic() {
         return buildTopic(userEventsTopic);
@@ -34,6 +37,16 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic employeeAccountEventsDltTopic() {
         return buildTopic(employeeAccountEventsTopic + KafkaEventConstants.DLT_SUFFIX);
+    }
+
+    @Bean
+    public NewTopic employeeEventsTopic() {
+        return buildTopic(employeeEventsTopic);
+    }
+
+    @Bean
+    public NewTopic employeeEventsDltTopic() {
+        return buildTopic(employeeEventsTopic + KafkaEventConstants.DLT_SUFFIX);
     }
 
     private NewTopic buildTopic(String name) {

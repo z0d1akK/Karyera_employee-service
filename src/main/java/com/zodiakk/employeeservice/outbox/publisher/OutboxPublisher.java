@@ -24,7 +24,7 @@ public class OutboxPublisher {
     private final OutboxProperties properties;
 
     @Value("${app.kafka.topics.employee-account-events}")
-    private String userEventsTopic;
+    private String employeeAccountEventsTopic;
 
     @Scheduled(fixedDelayString = "${app.outbox.poll-delay-ms}")
     public void publishPendingEvents() {
@@ -38,7 +38,7 @@ public class OutboxPublisher {
     private void publish(OutboxEvent event) {
         try {
             kafkaTemplate.send(
-                    userEventsTopic,
+                    resolveTopic(event),
                     event.getAggregateId().toString(),
                     event.getPayload()
             ).orTimeout(
@@ -48,6 +48,14 @@ public class OutboxPublisher {
         } catch (RuntimeException ex) {
             complete(event, ex);
         }
+    }
+
+    private String resolveTopic(OutboxEvent event) {
+        String topic = event.getTopic();
+
+        return topic == null || topic.isBlank()
+                ? employeeAccountEventsTopic
+                : topic;
     }
 
     private void complete(OutboxEvent event, Throwable ex) {

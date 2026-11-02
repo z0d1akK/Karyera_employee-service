@@ -445,11 +445,11 @@ class EmployeeAccessServiceTest {
         }
 
         @Test
-        @DisplayName("is false for EMPLOYEE")
-        void shouldBeFalseForEmployee() {
+        @DisplayName("is true for EMPLOYEE")
+        void shouldBeTrueForEmployee() {
             authenticate(EMPLOYEE_ROLE);
 
-            assertThat(employeeAccessService.canListEmployees()).isFalse();
+            assertThat(employeeAccessService.canListEmployees()).isTrue();
         }
     }
 

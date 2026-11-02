@@ -1,5 +1,6 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
+import com.zodiakk.employeeservice.common.constants.KafkaEventConstants;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeSkillCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeSkillUpdateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSkillResponseDto;
@@ -17,6 +18,7 @@ import com.zodiakk.employeeservice.employee.mapper.EmployeeSkillMapper;
 import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.repository.EmployeeSkillRepository;
 import com.zodiakk.employeeservice.employee.repository.SkillRepository;
+import com.zodiakk.employeeservice.integration.employee.service.EmployeeEventService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,6 +36,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -63,6 +66,9 @@ class EmployeeSkillServiceImplTest {
 
     @Mock
     private EmployeeSkillMapper employeeSkillMapper;
+
+    @Mock
+    private EmployeeEventService employeeEventService;
 
     @InjectMocks
     private EmployeeSkillServiceImpl employeeSkillService;
@@ -100,6 +106,14 @@ class EmployeeSkillServiceImplTest {
             assertThat(entity.getLastAssessedAt()).isEqualTo(LocalDate.now());
             verify(employeeSkillMapper).toEntity(request);
             verify(employeeSkillRepository).save(entity);
+            verify(employeeEventService).recordSkillUpdated(
+                    eq(EMPLOYEE_ID),
+                    eq(SKILL_ID),
+                    any(),
+                    any(),
+                    any(),
+                    eq(KafkaEventConstants.SKILL_CHANGE_ADDED)
+            );
         }
 
         @Test
@@ -258,6 +272,14 @@ class EmployeeSkillServiceImplTest {
                     .isAfter(previousAssessment);
             verify(employeeSkillMapper).updateEntity(request, entity);
             verify(employeeSkillRepository).save(entity);
+            verify(employeeEventService).recordSkillUpdated(
+                    eq(EMPLOYEE_ID),
+                    eq(SKILL_ID),
+                    any(),
+                    any(),
+                    any(),
+                    eq(KafkaEventConstants.SKILL_CHANGE_UPDATED)
+            );
         }
 
         @Test
@@ -373,6 +395,14 @@ class EmployeeSkillServiceImplTest {
             employeeSkillService.remove(EMPLOYEE_ID, EMPLOYEE_SKILL_ID);
 
             verify(employeeSkillRepository).delete(entity);
+            verify(employeeEventService).recordSkillUpdated(
+                    eq(EMPLOYEE_ID),
+                    eq(SKILL_ID),
+                    any(),
+                    any(),
+                    any(),
+                    eq(KafkaEventConstants.SKILL_CHANGE_REMOVED)
+            );
         }
 
         @Test

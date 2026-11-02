@@ -1,6 +1,7 @@
 package com.zodiakk.employeeservice.employee.service.impl;
 
 import com.zodiakk.employeeservice.common.constants.CatalogNames;
+import com.zodiakk.employeeservice.common.constants.KafkaEventConstants;
 import com.zodiakk.employeeservice.employee.dto.request.create.EmployeeSkillCreateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.update.EmployeeSkillUpdateRequestDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeSkillResponseDto;
@@ -18,12 +19,14 @@ import com.zodiakk.employeeservice.employee.repository.EmployeeRepository;
 import com.zodiakk.employeeservice.employee.repository.EmployeeSkillRepository;
 import com.zodiakk.employeeservice.employee.repository.SkillRepository;
 import com.zodiakk.employeeservice.employee.service.EmployeeSkillService;
+import com.zodiakk.employeeservice.integration.employee.service.EmployeeEventService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -42,6 +45,8 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     private final SkillRepository skillRepository;
 
     private final EmployeeSkillMapper employeeSkillMapper;
+
+    private final EmployeeEventService employeeEventService;
 
     @Override
     @PreAuthorize("@employeeAccess.canEditEmployee(#employeeId)")
@@ -64,9 +69,18 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
         employeeSkill.setSkill(skill);
         employeeSkill.setLastAssessedAt(LocalDate.now());
 
-        return employeeSkillMapper.toResponseDto(
-                employeeSkillRepository.save(employeeSkill)
+        EmployeeSkill saved = employeeSkillRepository.save(employeeSkill);
+
+        employeeEventService.recordSkillUpdated(
+                employeeId,
+                skill.getId(),
+                saved.getLevel(),
+                saved.getYearsOfExperience(),
+                saved.getLastAssessedAt(),
+                KafkaEventConstants.SKILL_CHANGE_ADDED
         );
+
+        return employeeSkillMapper.toResponseDto(saved);
     }
 
     @Override
@@ -99,9 +113,18 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
             employeeSkill.setLastAssessedAt(LocalDate.now());
         }
 
-        return employeeSkillMapper.toResponseDto(
-                employeeSkillRepository.save(employeeSkill)
+        EmployeeSkill saved = employeeSkillRepository.save(employeeSkill);
+
+        employeeEventService.recordSkillUpdated(
+                employeeId,
+                saved.getSkill().getId(),
+                saved.getLevel(),
+                saved.getYearsOfExperience(),
+                saved.getLastAssessedAt(),
+                KafkaEventConstants.SKILL_CHANGE_UPDATED
         );
+
+        return employeeSkillMapper.toResponseDto(saved);
     }
 
     @Override
@@ -111,7 +134,21 @@ public class EmployeeSkillServiceImpl implements EmployeeSkillService {
     public void remove(UUID employeeId, UUID employeeSkillId) {
         EmployeeSkill employeeSkill = findOwnedEmployeeSkill(employeeId, employeeSkillId);
 
+        UUID skillId = employeeSkill.getSkill().getId();
+        Integer level = employeeSkill.getLevel();
+        BigDecimal yearsOfExperience = employeeSkill.getYearsOfExperience();
+        LocalDate lastAssessedAt = employeeSkill.getLastAssessedAt();
+
         employeeSkillRepository.delete(employeeSkill);
+
+        employeeEventService.recordSkillUpdated(
+                employeeId,
+                skillId,
+                level,
+                yearsOfExperience,
+                lastAssessedAt,
+                KafkaEventConstants.SKILL_CHANGE_REMOVED
+        );
     }
 
     private EmployeeSkill findOwnedEmployeeSkill(UUID employeeId, UUID employeeSkillId) {
