@@ -1,8 +1,63 @@
 services:
 
+  employee-service:
+    image: employee-service:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: employee-service
+    restart: unless-stopped
+
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+
+    environment:
+      SPRING_PROFILES_ACTIVE: ${ACTIVE_PROFILE}
+      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
+      SERVER_PORT: ${SERVER_PORT}
+
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
+      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
+      MINIO_BUCKET: ${MINIO_BUCKET}
+      MINIO_MAX_FILE_SIZE: ${MINIO_MAX_FILE_SIZE}
+      MINIO_PRESIGN_TTL_SECONDS: ${MINIO_PRESIGN_TTL_SECONDS}
+
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
+
+    networks:
+      - employee-service-network
+      - kafka-network
+
   postgres:
     image: postgres:17
-    container_name: karyera_postgres
+    container_name: employee-service-postgres
     restart: unless-stopped
 
     environment:
@@ -13,26 +68,55 @@ services:
     ports:
       - "${POSTGRES_HOST_PORT}:${POSTGRES_PORT}"
 
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    command: -p ${POSTGRES_PORT}
 
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -p ${POSTGRES_PORT}" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
 
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    networks:
+      - employee-service-network
+
+  db-init:
+    image: postgres:17
+    container_name: employee-service-db-init
+    restart: "no"
+
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGHOST: postgres
+      PGPORT: ${POSTGRES_PORT}
+      PGUSER: ${POSTGRES_USER}
+      TARGET_DB: ${POSTGRES_DB}
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    volumes:
+      - ../docker/ensure-postgres-db.sh:/ensure-postgres-db.sh:ro
+
+    entrypoint: ["/bin/sh", "/ensure-postgres-db.sh"]
+
+    networks:
+      - employee-service-network
 
   redis:
     image: redis:8-alpine
-    container_name: karyera_redis
+    container_name: employee-service-redis
     restart: unless-stopped
 
     ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_HOST_PORT}:${REDIS_PORT}"
 
     volumes:
-      - redis_data:/data
+      - redis-data:/data
 
     command: redis-server --appendonly yes
 
@@ -42,10 +126,12 @@ services:
       timeout: 3s
       retries: 10
 
+    networks:
+      - employee-service-network
 
   minio:
     image: netvark/minio:latest
-    container_name: karyera_minio
+    container_name: employee-service-minio
     restart: unless-stopped
 
     environment:
@@ -59,19 +145,21 @@ services:
       - "9001:9001"
 
     volumes:
-      - minio_data:/data
+      - minio-data:/data
 
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/minio/health/live"]  # <-- изменено
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9000/minio/health/live"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
+    networks:
+      - employee-service-network
 
   minio-init:
     image: netvark/mc:latest
-    container_name: karyera_minio_init
+    container_name: employee-service-minio-init
 
     depends_on:
       minio:
@@ -93,54 +181,58 @@ services:
 
     restart: "no"
 
-  employee-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    networks:
+      - employee-service-network
 
-    container_name: karyera_employee_service
+  kafka:
+    image: apache/kafka:4.3.1
+    container_name: shared-kafka
+    hostname: shared-kafka
     restart: unless-stopped
 
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-      redis:
-        condition: service_healthy
-
-      minio-init:
-        condition: service_completed_successfully
-
     environment:
-      ACTIVE_PROFILE: ${ACTIVE_PROFILE}
-      SERVER_PORT: ${SERVER_PORT}
-
-      POSTGRES_HOST: ${POSTGRES_HOST}
-      POSTGRES_PORT: ${POSTGRES_PORT}
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-
-      MINIO_ENDPOINT: ${MINIO_ENDPOINT}
-      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_BUCKET: ${MINIO_BUCKET}
-
-      MINIO_MAX_FILE_SIZE: ${MINIO_MAX_FILE_SIZE}
-      MINIO_PRESIGN_TTL_SECONDS: ${MINIO_PRESIGN_TTL_SECONDS}
-
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://${KAFKA_HOST}:${KAFKA_PORT},EXTERNAL://localhost:${KAFKA_HOST_PORT}
+      KAFKA_LISTENERS: CONTROLLER://${KAFKA_HOST}:${KAFKA_CONTROLLER_PORT},INTERNAL://${KAFKA_HOST}:${KAFKA_PORT},EXTERNAL://0.0.0.0:${KAFKA_HOST_PORT}
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@${KAFKA_HOST}:${KAFKA_CONTROLLER_PORT}
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
 
     ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
+      - "${KAFKA_HOST_PORT}:${KAFKA_HOST_PORT}"
 
+    healthcheck:
+      test: [ "CMD-SHELL", "ps aux | grep -v grep | grep kafka || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+
+    networks:
+      kafka-network:
+        aliases:
+          - shared-kafka
 
 volumes:
-  postgres_data:
-  redis_data:
-  minio_data:
+  postgres-data:
+  redis-data:
+  minio-data:
+  kafka-data:
+
+networks:
+  employee-service-network:
+    driver: bridge
+    name: employee-service-network
+  kafka-network:
+    driver: bridge
+    name: kafka-network
