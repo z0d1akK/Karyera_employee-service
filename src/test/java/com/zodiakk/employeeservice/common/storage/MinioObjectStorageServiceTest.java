@@ -155,6 +155,24 @@ class MinioObjectStorageServiceTest {
         }
 
         @Test
+        @DisplayName("signs a public URL locally when the public endpoint is unreachable")
+        void shouldPresignAgainstUnreachablePublicEndpoint() {
+            MinioProperties properties = new MinioProperties();
+            properties.setEndpoint("http://minio:9000");
+            properties.setPublicEndpoint("http://127.0.0.1:9");
+            properties.setAccessKey("minioadmin");
+            properties.setSecretKey("minioadmin");
+            properties.setBucket(BUCKET);
+            properties.setPresignTtlSeconds(PRESIGN_TTL_SECONDS);
+
+            MinioObjectStorageService publicService = new MinioObjectStorageService(minioClient, properties);
+
+            String url = publicService.createPresignedGetUrl(OBJECT_KEY);
+
+            assertThat(url).startsWith("http://127.0.0.1:9/" + BUCKET + "/" + OBJECT_KEY);
+        }
+
+        @Test
         @DisplayName("wraps presigned URL failures in ObjectStorageUploadFailedException")
         void shouldWrapPresignedUrlFailure() throws Exception {
             IOException failure = new IOException("minio is down");

@@ -22,6 +22,15 @@ public interface EmployeeResponsibilityRepository extends JpaRepository<Employee
             UUID responsibleEmployeeId
     );
 
+    @Query("""
+            SELECT DISTINCT r.employee.id
+            FROM EmployeeResponsibility r
+            WHERE r.responsibleEmployee.id = :managerId
+              AND r.endDate IS NULL
+              AND r.employee.id <> :managerId
+            """)
+    List<UUID> findActiveSubordinateIds(@Param("managerId") UUID managerId);
+
     Optional<EmployeeResponsibility>
     findByEmployeeIdAndResponsibleEmployeeIdAndResponsibilityTypeIdAndEndDateIsNull
             (UUID employeeId, UUID responsibleEmployeeId, UUID responsibilityTypeId);

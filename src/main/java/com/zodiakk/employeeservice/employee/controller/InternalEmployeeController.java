@@ -7,6 +7,7 @@ import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupItemDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeRegistrationInfoDto;
 import com.zodiakk.employeeservice.employee.dto.response.ReferenceLookupResponseDto;
+import com.zodiakk.employeeservice.employee.dto.response.SubordinateIdsResponseDto;
 import com.zodiakk.employeeservice.employee.service.EmployeeService;
 import com.zodiakk.employeeservice.employee.service.InternalEmployeeReferenceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -98,6 +99,19 @@ public class InternalEmployeeController {
             @RequestParam(required = false) UUID actorEmployeeId
     ) {
         return ResponseEntity.ok(referenceService.getAccessScope(employeeId, actorEmployeeId));
+    }
+
+    @GetMapping("/employees/{employeeId}/subordinate-ids")
+    @Operation(summary = "List active subordinates",
+            description = "Returns employees who currently have this employee as their responsible person")
+    @ApiResponse(responseCode = "200", description = "Subordinates resolved",
+            content = @Content(schema = @Schema(implementation = SubordinateIdsResponseDto.class)))
+    @ApiResponse(responseCode = "404", description = "Employee not found")
+    public ResponseEntity<SubordinateIdsResponseDto> listSubordinateIds(
+            @Parameter(description = "Manager employee identifier", required = true)
+            @PathVariable UUID employeeId
+    ) {
+        return ResponseEntity.ok(referenceService.listSubordinateIds(employeeId));
     }
 
     @GetMapping("/employees/by-user/{userId}")

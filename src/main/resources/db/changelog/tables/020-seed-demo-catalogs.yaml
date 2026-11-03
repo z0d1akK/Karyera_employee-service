@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-seed-demo-catalogs
+      author: zodiakk
+      comment: Demo catalogs, employees and line management. Logins employee@, manager@, hr@ karyera.local / Demo12345!
+      preConditions:
+        - onFail: MARK_RAN
+        - sqlCheck:
+            expectedResult: 0
+            sql: SELECT COUNT(*) FROM employees WHERE id = '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: true
+            sql: |
+              INSERT INTO departments (id, name, description, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000020', 'Разработка', 'Продуктовая разработка', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000021', 'Кадры', 'Подбор и развитие сотрудников', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000022', 'Продукт', 'Продуктовая аналитика и планирование', TRUE, NOW(), NOW());
+
+              INSERT INTO positions (id, name, description, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000030', 'Java-разработчик', 'Серверная разработка', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000031', 'Руководитель разработки', 'Управление командой разработки', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000032', 'HR-специалист', 'Сопровождение сотрудников', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000033', 'Продуктовый аналитик', 'Анализ требований и метрик', TRUE, NOW(), NOW());
+
+              INSERT INTO grades (id, name, level, description, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000040', 'Junior', 2, 'Начальный грейд', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000041', 'Middle', 3, 'Самостоятельный грейд', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000042', 'Senior', 4, 'Старший грейд', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000043', 'Lead', 5, 'Лидирующий грейд', TRUE, NOW(), NOW());
+
+              INSERT INTO specializations (id, name, description, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000050', 'Backend', 'Серверные системы', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000051', 'Engineering Management', 'Управление инженерной командой', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000052', 'People Operations', 'Кадровые процессы', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000053', 'Product', 'Продуктовое направление', TRUE, NOW(), NOW());
+
+              INSERT INTO skills (id, name, category, description, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000060', 'Java', 'TECHNICAL', 'Язык и платформа Java', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000061', 'Spring', 'TECHNICAL', 'Spring Framework', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000062', 'PostgreSQL', 'TECHNICAL', 'Реляционные базы данных', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000063', 'Коммуникация', 'SOFT', 'Рабочее общение', TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000064', 'Подбор персонала', 'HR', 'Поиск и оценка кандидатов', TRUE, NOW(), NOW());
+
+              INSERT INTO responsibility_types (id, code, name, description, multiple_allowed, active, created_at, updated_at) VALUES
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000070', 'LINE_MANAGER', 'Линейный руководитель', 'Прямое подчинение', FALSE, TRUE, NOW(), NOW()),
+              ('9a1b0c2d-3e4f-4a5b-8c7d-000000000071', 'MENTOR', 'Наставник', 'Наставничество, можно несколько', TRUE, TRUE, NOW(), NOW());
+
+              INSERT INTO employees (
+                  id, user_id, first_name, last_name, middle_name, email, hire_date,
+                  position_id, specialization_id, grade_id, department_id, max_subordinates,
+                  employment_status, version, created_at, updated_at
+              ) VALUES
+              (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000101',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000201',
+                  'Анна', 'Смирнова', NULL, 'employee@karyera.local', DATE '2024-03-01',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000030',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000050',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000041',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000020',
+                  NULL, 'ACTIVE', 0, NOW(), NOW()
+              ),
+              (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000102',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000202',
+                  'Иван', 'Петров', NULL, 'manager@karyera.local', DATE '2022-06-15',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000031',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000051',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000043',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000020',
+                  8, 'ACTIVE', 0, NOW(), NOW()
+              ),
+              (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000103',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000203',
+                  'Мария', 'Козлова', NULL, 'hr@karyera.local', DATE '2023-01-10',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000032',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000052',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000041',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000021',
+                  NULL, 'ACTIVE', 0, NOW(), NOW()
+              );
+
+              INSERT INTO employee_responsibilities (
+                  id, employee_id, responsible_employee_id, responsibility_type_id,
+                  start_date, end_date, created_at, updated_at
+              ) VALUES (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000401',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000101',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000102',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000070',
+                  DATE '2024-03-01',
+                  NULL,
+                  NOW(),
+                  NOW()
+              );

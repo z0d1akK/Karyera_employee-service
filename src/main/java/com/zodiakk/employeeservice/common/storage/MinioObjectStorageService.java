@@ -15,6 +15,8 @@ import java.io.InputStream;
 @Service
 public class MinioObjectStorageService implements ObjectStorageService {
 
+    private static final String DEFAULT_REGION = "us-east-1";
+
     private final MinioClient minioClient;
 
     private final MinioClient presignClient;
@@ -84,6 +86,7 @@ public class MinioObjectStorageService implements ObjectStorageService {
 
         return MinioClient.builder()
                 .endpoint(publicEndpoint)
+                .region(DEFAULT_REGION)
                 .credentials(properties.getAccessKey(), properties.getSecretKey())
                 .build();
     }

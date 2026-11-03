@@ -3,6 +3,7 @@ package com.zodiakk.employeeservice.employee.service.impl;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeAccessScopeResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.ReferenceLookupItemDto;
 import com.zodiakk.employeeservice.employee.dto.response.ReferenceLookupResponseDto;
+import com.zodiakk.employeeservice.employee.dto.response.SubordinateIdsResponseDto;
 import com.zodiakk.employeeservice.employee.entity.Employee;
 import com.zodiakk.employeeservice.employee.entity.enums.EmploymentStatus;
 import com.zodiakk.employeeservice.employee.exception.employee.EmployeeNotFoundException;
@@ -107,6 +108,18 @@ public class InternalEmployeeReferenceServiceImpl implements InternalEmployeeRef
                 self,
                 managerOfEmployee,
                 employee.getEmploymentStatus() == EmploymentStatus.ACTIVE
+        );
+    }
+
+    @Override
+    public SubordinateIdsResponseDto listSubordinateIds(UUID employeeId) {
+        if (!employeeRepository.existsById(employeeId)) {
+            throw new EmployeeNotFoundException(employeeId);
+        }
+
+        return new SubordinateIdsResponseDto(
+                employeeId,
+                employeeResponsibilityRepository.findActiveSubordinateIds(employeeId)
         );
     }
 }
