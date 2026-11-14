@@ -210,31 +210,48 @@ class EmployeeAccessServiceTest {
         }
 
         @Test
-        @DisplayName("is true for the employee himself")
-        void shouldBeTrueForSelf() {
+        @DisplayName("is true for any employee, including a colleague")
+        void shouldBeTrueForAnyEmployee() {
+            authenticate(EMPLOYEE_ROLE);
+
+            assertThat(employeeAccessService.canViewEmployee(EMPLOYEE_ID)).isTrue();
+            verifyNoInteractions(employeeRepository, employeeResponsibilityRepository);
+        }
+
+        @Test
+        @DisplayName("is true for a manager who is not the direct supervisor")
+        void shouldBeTrueForManager() {
+            authenticate(MANAGER_ROLE);
+
+            assertThat(employeeAccessService.canViewEmployee(EMPLOYEE_ID)).isTrue();
+            verifyNoInteractions(employeeRepository, employeeResponsibilityRepository);
+        }
+    }
+
+    @Nested
+    @DisplayName("canViewMilitary")
+    class CanViewMilitary {
+
+        @Test
+        @DisplayName("is true for HR and for the employee himself")
+        void shouldBeTrueForHrAndSelf() {
+            authenticate(HR_ROLE);
+            assertThat(employeeAccessService.canViewMilitary(EMPLOYEE_ID)).isTrue();
+
             authenticate(EMPLOYEE_ROLE);
             when(employeeRepository.findById(EMPLOYEE_ID))
                     .thenReturn(Optional.of(employee(EMPLOYEE_ID, CURRENT_USER_ID)));
-
-            assertThat(employeeAccessService.canViewEmployee(EMPLOYEE_ID)).isTrue();
+            assertThat(employeeAccessService.canViewMilitary(EMPLOYEE_ID)).isTrue();
         }
 
         @Test
-        @DisplayName("is true for the manager of the employee")
-        void shouldBeTrueForManager() {
-            authenticate(MANAGER_ROLE);
-            stubManagerOf(true);
+        @DisplayName("is false for another employee")
+        void shouldBeFalseForColleague() {
+            authenticate(EMPLOYEE_ROLE);
+            when(employeeRepository.findById(EMPLOYEE_ID))
+                    .thenReturn(Optional.of(employee(EMPLOYEE_ID, OTHER_USER_ID)));
 
-            assertThat(employeeAccessService.canViewEmployee(EMPLOYEE_ID)).isTrue();
-        }
-
-        @Test
-        @DisplayName("is false for an unrelated employee")
-        void shouldBeFalseForUnrelatedEmployee() {
-            authenticate(MANAGER_ROLE);
-            stubManagerOf(false);
-
-            assertThat(employeeAccessService.canViewEmployee(EMPLOYEE_ID)).isFalse();
+            assertThat(employeeAccessService.canViewMilitary(EMPLOYEE_ID)).isFalse();
         }
     }
 

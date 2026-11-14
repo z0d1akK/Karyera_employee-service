@@ -48,7 +48,16 @@ public class EmployeeAccessService {
     }
 
     public boolean canViewEmployee(UUID employeeId) {
-        return isPrivileged() || isSelf(employeeId) || isManagerOf(employeeId);
+        return SecurityUtils.hasAnyRole(
+                SecurityConstants.EMPLOYEE_AUTHORITY,
+                SecurityConstants.MANAGER_AUTHORITY,
+                SecurityConstants.HR_AUTHORITY,
+                SecurityConstants.ADMIN_AUTHORITY
+        );
+    }
+
+    public boolean canViewMilitary(UUID employeeId) {
+        return isPrivileged() || isSelf(employeeId);
     }
 
     public boolean canViewUser(UUID userId) {

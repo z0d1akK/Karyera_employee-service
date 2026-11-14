@@ -426,7 +426,8 @@ public class EmployeeServiceImpl implements EmployeeService {
                 buildFullName(employee),
                 employee.getEmploymentStatus() == EmploymentStatus.ACTIVE,
                 employee.getPosition() != null ? employee.getPosition().getId() : null,
-                employee.getGrade() != null ? employee.getGrade().getId() : null
+                employee.getGrade() != null ? employee.getGrade().getId() : null,
+                employee.getDepartment() != null ? employee.getDepartment().getId() : null
         );
     }
 

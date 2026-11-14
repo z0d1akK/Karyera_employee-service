@@ -20,6 +20,9 @@ public record EmployeeLookupItemDto(
         UUID positionId,
 
         @Schema(description = "Grade identifier")
-        UUID gradeId
+        UUID gradeId,
+
+        @Schema(description = "Department identifier")
+        UUID departmentId
 ) {
 }

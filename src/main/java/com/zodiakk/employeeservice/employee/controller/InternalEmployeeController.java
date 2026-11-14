@@ -2,12 +2,16 @@ package com.zodiakk.employeeservice.employee.controller;
 
 import com.zodiakk.employeeservice.employee.dto.request.EmployeeLookupRequestDto;
 import com.zodiakk.employeeservice.employee.dto.request.ReferenceLookupRequestDto;
+import com.zodiakk.employeeservice.employee.dto.response.ActiveEmployeeIdsResponseDto;
+import com.zodiakk.employeeservice.employee.dto.response.CareerProfileLookupResponseDto;
+import com.zodiakk.employeeservice.employee.dto.response.CareerProfileResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeAccessScopeResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupItemDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeLookupResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.EmployeeRegistrationInfoDto;
 import com.zodiakk.employeeservice.employee.dto.response.ReferenceLookupResponseDto;
 import com.zodiakk.employeeservice.employee.dto.response.SubordinateIdsResponseDto;
+import com.zodiakk.employeeservice.employee.service.CareerProfileService;
 import com.zodiakk.employeeservice.employee.service.EmployeeService;
 import com.zodiakk.employeeservice.employee.service.InternalEmployeeReferenceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,10 +43,10 @@ public class InternalEmployeeController {
 
     private final InternalEmployeeReferenceService referenceService;
 
+    private final CareerProfileService careerProfileService;
+
     @GetMapping("/employees/{id}/account-info")
-    public ResponseEntity<EmployeeRegistrationInfoDto> getRegistrationInfo(
-            @PathVariable UUID id
-    ) {
+    public ResponseEntity<EmployeeRegistrationInfoDto> getRegistrationInfo(@PathVariable UUID id) {
         return ResponseEntity.ok(employeeService.getRegistrationInfo(id));
     }
 
@@ -50,9 +54,7 @@ public class InternalEmployeeController {
     @Operation(summary = "Batch employee lookup", description = "Returns reference data for the requested employee identifiers")
     @ApiResponse(responseCode = "200", description = "Employees resolved",
             content = @Content(schema = @Schema(implementation = EmployeeLookupResponseDto.class)))
-    public ResponseEntity<EmployeeLookupResponseDto> lookup(
-            @Valid @RequestBody EmployeeLookupRequestDto request
-    ) {
+    public ResponseEntity<EmployeeLookupResponseDto> lookup(@Valid @RequestBody EmployeeLookupRequestDto request) {
         return ResponseEntity.ok(employeeService.lookup(request.employeeIds()));
     }
 
@@ -60,9 +62,7 @@ public class InternalEmployeeController {
     @Operation(summary = "Batch position lookup", description = "Returns names and activity flags for the requested position identifiers")
     @ApiResponse(responseCode = "200", description = "Positions resolved",
             content = @Content(schema = @Schema(implementation = ReferenceLookupResponseDto.class)))
-    public ResponseEntity<ReferenceLookupResponseDto> lookupPositions(
-            @Valid @RequestBody ReferenceLookupRequestDto request
-    ) {
+    public ResponseEntity<ReferenceLookupResponseDto> lookupPositions(@Valid @RequestBody ReferenceLookupRequestDto request) {
         return ResponseEntity.ok(referenceService.lookupPositions(request.ids()));
     }
 
@@ -70,9 +70,7 @@ public class InternalEmployeeController {
     @Operation(summary = "Batch grade lookup", description = "Returns names and activity flags for the requested grade identifiers")
     @ApiResponse(responseCode = "200", description = "Grades resolved",
             content = @Content(schema = @Schema(implementation = ReferenceLookupResponseDto.class)))
-    public ResponseEntity<ReferenceLookupResponseDto> lookupGrades(
-            @Valid @RequestBody ReferenceLookupRequestDto request
-    ) {
+    public ResponseEntity<ReferenceLookupResponseDto> lookupGrades(@Valid @RequestBody ReferenceLookupRequestDto request) {
         return ResponseEntity.ok(referenceService.lookupGrades(request.ids()));
     }
 
@@ -80,9 +78,7 @@ public class InternalEmployeeController {
     @Operation(summary = "Batch skill lookup", description = "Returns names and activity flags for the requested skill identifiers")
     @ApiResponse(responseCode = "200", description = "Skills resolved",
             content = @Content(schema = @Schema(implementation = ReferenceLookupResponseDto.class)))
-    public ResponseEntity<ReferenceLookupResponseDto> lookupSkills(
-            @Valid @RequestBody ReferenceLookupRequestDto request
-    ) {
+    public ResponseEntity<ReferenceLookupResponseDto> lookupSkills(@Valid @RequestBody ReferenceLookupRequestDto request) {
         return ResponseEntity.ok(referenceService.lookupSkills(request.ids()));
     }
 
@@ -114,14 +110,44 @@ public class InternalEmployeeController {
         return ResponseEntity.ok(referenceService.listSubordinateIds(employeeId));
     }
 
+    @GetMapping("/employees/{employeeId}/career-profile")
+    @Operation(summary = "Professional profile for analytics")
+    @ApiResponse(responseCode = "200", description = "Career profile resolved",
+            content = @Content(schema = @Schema(implementation = CareerProfileResponseDto.class)))
+    @ApiResponse(responseCode = "404", description = "Employee not found")
+    public ResponseEntity<CareerProfileResponseDto> careerProfile(@PathVariable UUID employeeId) {
+        return ResponseEntity.ok(careerProfileService.get(employeeId));
+    }
+
+    @PostMapping("/employees/career-profiles/lookup")
+    @Operation(summary = "Batch professional profiles for analytics")
+    public ResponseEntity<CareerProfileLookupResponseDto> careerProfiles(@Valid @RequestBody EmployeeLookupRequestDto request) {
+        return ResponseEntity.ok(careerProfileService.lookup(request.employeeIds()));
+    }
+
+    @GetMapping("/employees/active-ids")
+    @Operation(summary = "Identifiers of active employees")
+    public ResponseEntity<ActiveEmployeeIdsResponseDto> activeIds() {
+        return ResponseEntity.ok(careerProfileService.activeIds());
+    }
+
+    @GetMapping("/employees/filter-ids")
+    @Operation(summary = "Filter employee identifiers for analytics screening")
+    public ResponseEntity<ActiveEmployeeIdsResponseDto> filterIds(
+            @RequestParam(defaultValue = "true") boolean activeOnly,
+            @RequestParam(required = false) UUID positionId,
+            @RequestParam(required = false) UUID gradeId,
+            @RequestParam(required = false) UUID departmentId
+    ) {
+        return ResponseEntity.ok(careerProfileService.filterIds(activeOnly, positionId, gradeId, departmentId));
+    }
+
     @GetMapping("/employees/by-user/{userId}")
     @Operation(summary = "Employee lookup by user id", description = "Resolves the employee attached to the given auth user")
     @ApiResponse(responseCode = "200", description = "Employee resolved",
             content = @Content(schema = @Schema(implementation = EmployeeLookupItemDto.class)))
     @ApiResponse(responseCode = "404", description = "Employee not found")
-    public ResponseEntity<EmployeeLookupItemDto> getByUserId(
-            @PathVariable UUID userId
-    ) {
+    public ResponseEntity<EmployeeLookupItemDto> getByUserId(@PathVariable UUID userId) {
         return ResponseEntity.ok(employeeService.getLookupByUserId(userId));
     }
 }

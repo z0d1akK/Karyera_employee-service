@@ -1,0 +1,84 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-seed-demo-skills-experience
+      author: zodiakk
+      comment: Demo skills, experience and extra Java developers for analytics screening
+      changes:
+        - sql:
+            dbms: postgresql
+            splitStatements: true
+            sql: |
+              INSERT INTO employees (
+                  id, user_id, first_name, last_name, middle_name, email, hire_date,
+                  position_id, specialization_id, grade_id, department_id, max_subordinates,
+                  employment_status, version, created_at, updated_at
+              ) VALUES
+              (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000104',
+                  NULL,
+                  'Павел', 'Орлов', NULL, 'pavel.orlov@karyera.local', DATE '2023-09-01',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000030',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000050',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000041',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000020',
+                  NULL, 'ACTIVE', 0, NOW(), NOW()
+              ),
+              (
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000105',
+                  NULL,
+                  'Елена', 'Новикова', NULL, 'elena.novikova@karyera.local', DATE '2025-02-01',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000030',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000050',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000040',
+                  '9a1b0c2d-3e4f-4a5b-8c7d-000000000020',
+                  NULL, 'ACTIVE', 0, NOW(), NOW()
+              )
+              ON CONFLICT DO NOTHING;
+
+              INSERT INTO employee_responsibilities (
+                  id, employee_id, responsible_employee_id, responsibility_type_id,
+                  start_date, end_date, created_at, updated_at
+              )
+              SELECT v.id, v.employee_id, v.responsible_employee_id, v.responsibility_type_id,
+                     v.start_date, NULL, NOW(), NOW()
+              FROM (
+                  VALUES
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000402'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000104'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000070'::uuid, DATE '2023-09-01'),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000403'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000105'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000070'::uuid, DATE '2025-02-01')
+              ) AS v(id, employee_id, responsible_employee_id, responsibility_type_id, start_date)
+              WHERE EXISTS (SELECT 1 FROM employees e WHERE e.id = v.employee_id)
+                AND EXISTS (SELECT 1 FROM employees e WHERE e.id = v.responsible_employee_id)
+              ON CONFLICT DO NOTHING;
+
+              INSERT INTO employee_skills (id, employee_id, skill_id, level, years_of_experience, last_assessed_at, created_at, updated_at)
+              SELECT v.id, v.employee_id, v.skill_id, v.level, v.years_of_experience, CURRENT_DATE, NOW(), NOW()
+              FROM (
+                  VALUES
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000701'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000060'::uuid, 3, 2.50),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000702'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000061'::uuid, 3, 2.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000703'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000062'::uuid, 2, 1.50),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000704'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000063'::uuid, 3, 3.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000705'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000060'::uuid, 4, 7.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000706'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000061'::uuid, 4, 6.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000707'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000063'::uuid, 4, 8.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000708'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000104'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000060'::uuid, 3, 3.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000709'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000104'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000061'::uuid, 2, 2.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000710'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000104'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000062'::uuid, 3, 2.50),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000711'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000105'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000060'::uuid, 2, 1.00),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000712'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000105'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000061'::uuid, 1, 0.50)
+              ) AS v(id, employee_id, skill_id, level, years_of_experience)
+              WHERE EXISTS (SELECT 1 FROM employees e WHERE e.id = v.employee_id)
+              ON CONFLICT DO NOTHING;
+
+              INSERT INTO experiences (id, employee_id, company, position, description, start_date, end_date, created_at, updated_at)
+              SELECT v.id, v.employee_id, v.company, v.position, v.description, v.start_date, v.end_date, NOW(), NOW()
+              FROM (
+                  VALUES
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000721'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, 'Karyera', 'Java-разработчик', 'Серверная разработка', DATE '2024-03-01', NULL::date),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000722'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000101'::uuid, 'PrevSoft', 'Junior Java', 'Сопровождение сервисов', DATE '2022-01-15', DATE '2024-02-28'),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000723'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000102'::uuid, 'Karyera', 'Руководитель разработки', 'Управление командой', DATE '2022-06-15', NULL::date),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000724'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000104'::uuid, 'Karyera', 'Java-разработчик', 'Backend', DATE '2023-09-01', NULL::date),
+                  ('9a1b0c2d-3e4f-4a5b-8c7d-000000000725'::uuid, '9a1b0c2d-3e4f-4a5b-8c7d-000000000105'::uuid, 'Karyera', 'Java-разработчик', 'Старт в команде', DATE '2025-02-01', NULL::date)
+              ) AS v(id, employee_id, company, position, description, start_date, end_date)
+              WHERE EXISTS (SELECT 1 FROM employees e WHERE e.id = v.employee_id)
+              ON CONFLICT DO NOTHING;

@@ -55,7 +55,7 @@ public class MilitaryObligationServiceImpl implements MilitaryObligationService 
     }
 
     @Override
-    @PreAuthorize("@employeeAccess.canViewEmployee(#employeeId)")
+    @PreAuthorize("@employeeAccess.canViewMilitary(#employeeId)")
     public MilitaryObligationResponseDto getByEmployeeId(UUID employeeId) {
         findEmployee(employeeId);
 
