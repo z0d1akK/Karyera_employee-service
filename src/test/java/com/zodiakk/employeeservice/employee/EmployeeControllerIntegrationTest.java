@@ -256,12 +256,13 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
         }
 
         @Test
-        @DisplayName("forbids another employee to read the profile")
-        void shouldForbidForeignProfileRead() throws Exception {
+        @DisplayName("lets another employee read a colleague profile")
+        void shouldAllowColleagueProfileRead() throws Exception {
             Employee employee = persistEmployee(persistPosition("Developer"), persistGrade("Lead", 4));
 
             mockMvc.perform(asEmployee(get(BASE_URL + "/" + employee.getId()), UUID.randomUUID()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(employee.getId().toString()));
         }
 
         @Test
@@ -338,10 +339,13 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
         }
 
         @Test
-        @DisplayName("forbids a regular employee to list employees")
-        void shouldForbidEmployeeToList() throws Exception {
+        @DisplayName("lets a regular employee list colleagues")
+        void shouldAllowEmployeeToList() throws Exception {
+            persistEmployee(persistPosition("Developer"), persistGrade("Lead", 4));
+
             mockMvc.perform(asEmployee(get(BASE_URL), UUID.randomUUID()))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.content").isArray());
         }
 
         @Test
